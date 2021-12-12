@@ -6,6 +6,7 @@ defmodule ExGrib.MixProject do
       app: :ex_grib,
       version: "0.1.0",
       elixir: "~> 1.12",
+      elixirc_paths: code(Mix.env()),
       elixirc_options: [warnings_as_errors: true],
       start_permanent: Mix.env() == :prod,
       deps: deps()
@@ -17,6 +18,9 @@ defmodule ExGrib.MixProject do
       extra_applications: [:logger]
     ]
   end
+
+  defp code(:test), do: ["lib", "test/support"]
+  defp code(_), do: ["lib"]
 
   defp deps do
     []
