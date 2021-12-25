@@ -21,8 +21,9 @@ defmodule ExGrib.Grib2Test do
     test "it returns the identification details of the grib" do
       {:ok, _, _, rest} = Grib2.header(file_contents("gfs_25km.grb2"))
 
-      {:ok, 21, 1, :us_national_weather_service_ncep_wmc, :unknown, 1, 1, 2021, 12, 12, 12, 0, 0,
-       :operational_products, :forecast_products, _} = Grib2.identification(rest)
+      {:ok, 21, 1, :us_national_weather_service_ncep_wmc, :unknown, 1, :start_of_forecast, 2021,
+       12, 12, 12, 0, 0, :operational_products, :forecast_products,
+       _} = Grib2.identification(rest)
     end
 
     test "it errors on an unrecognised section" do

@@ -9,6 +9,7 @@ defmodule ExGrib.Grib2 do
   alias ExGrib.Grib2.Discipline
   alias ExGrib.Grib2.GribType
   alias ExGrib.Grib2.ProductionStatus
+  alias ExGrib.Grib2.ReferenceTime
   alias ExGrib.Grib2.SubCentre
 
   @type file_size :: integer()
@@ -35,7 +36,7 @@ defmodule ExGrib.Grib2 do
 
   @spec identification(binary()) ::
           {:ok, section_size(), section_number(), Centre.t(), SubCentre.t(), local_version(),
-           reference_time_significance(), year(), month(), day(), hour(), minute(), second(),
+           ReferenceTime.t(), year(), month(), day(), hour(), minute(), second(),
            ProductionStatus.t(), GribType.t(), binary()}
           | :error
   def identification(<<
@@ -45,7 +46,7 @@ defmodule ExGrib.Grib2 do
         sub_centre_id::integer-size(16),
         2,
         local_version::integer(),
-        reference_time_significance::integer(),
+        reference_time_id::integer(),
         year::integer-size(16),
         month::integer(),
         day::integer(),
@@ -66,7 +67,7 @@ defmodule ExGrib.Grib2 do
       end
 
     {:ok, size, number, Centre.get(centre_id), SubCentre.get(centre_id, sub_centre_id),
-     local_version, reference_time_significance, year, month, day, hour, minute, second,
+     local_version, ReferenceTime.get(reference_time_id), year, month, day, hour, minute, second,
      ProductionStatus.get(production_status), GribType.get(type), rest}
   end
 
