@@ -72,4 +72,22 @@ defmodule ExGrib.Grib2 do
   end
 
   def identification(_), do: :error
+
+  @spec local_use(binary()) :: {:ok, binary()} | :error
+  def local_use(<<section_size::integer-size(32), 2, possibly_reserved::binary()>>) do
+    if section_size > 0 do
+      size_to_skip = section_size - 5
+      <<_skip::binary-size(size_to_skip), rest::binary()>> = possibly_reserved
+      {:ok, rest}
+    else
+      {:ok, possibly_reserved}
+    end
+  end
+
+  # local use is sometimes missing
+  def local_use(<<_section_size::integer-size(32), 3, _::binary>> = rest) do
+    {:ok, rest}
+  end
+
+  def local_use(_), do: :error
 end
