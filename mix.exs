@@ -9,7 +9,8 @@ defmodule ExGrib.MixProject do
       elixirc_paths: code(Mix.env()),
       elixirc_options: [warnings_as_errors: true],
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      dialyzer: dialyzer()
     ]
   end
 
@@ -23,6 +24,19 @@ defmodule ExGrib.MixProject do
   defp code(_), do: ["lib"]
 
   defp deps do
-    []
+    [
+      {:dialyxir, "~> 1.1", only: [:dev]}
+    ]
+  end
+
+  defp dialyzer do
+    [
+      plt_add_deps: :app_tree,
+      plt_add_apps: [:mix],
+      check_plt: true,
+      flags: [:error_handling, :race_conditions],
+      ignore_warnings: "dialyzer_ignore.exs",
+      list_unused_filters: true
+    ]
   end
 end
