@@ -6,9 +6,30 @@ defmodule ExGrib.Grib2.SubCentre do
   https://www.nco.ncep.noaa.gov/pmb/docs/on388/tablec.html
   """
 
-  @typep centre_id :: integer()
-  @typep sub_centre_id :: integer()
-  @spec get(centre_id(), sub_centre_id()) :: atom()
+  alias ExGrib.Grib2.Centre
+
+  @type id :: integer()
+  @type t ::
+          :ncep_re_analysis_project
+          | :ncep_ensemble_products
+          | :ncep_central_operations
+          | :environmental_modeling_center
+          | :weather_prediction_center
+          | :ocean_prediction_center
+          | :climate_prediction_center
+          | :aviation_weather_center
+          | :storm_prediction_center
+          | :national_hurricane_center
+          | :nws_techniques_development_laboratory
+          | :nesdis_office_of_research_and_applications
+          | :federal_aviation_administration
+          | :nws_meteorological_development_laboratory
+          | :north_american_regional_reanalysis_project
+          | :space_weather_prediction_center
+          | :esrl_global_systems_division
+          | :unknown
+
+  @spec get(Centre.id(), id()) :: t()
   def get(7, 1), do: :ncep_re_analysis_project
   def get(7, 2), do: :ncep_ensemble_products
   def get(7, 3), do: :ncep_central_operations

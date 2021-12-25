@@ -5,8 +5,23 @@ defmodule ExGrib.Grib2.ProductionStatus do
   https://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_doc/grib2_table1-3.shtml
   """
 
-  @typep status_id :: integer()
-  @spec get(status_id()) :: atom()
+  @type id :: integer()
+  @type t ::
+          :operational_products
+          | :operational_test_products
+          | :research_products
+          | :re_analysis_products
+          | :thorpex_interactive_grand_global_ensemble_tigge
+          | :thorpex_interactive_grand_global_ensemble_tigge_test
+          | :s2s_operational_products
+          | :s2s_test_products
+          | :uncertainties_in_ensembles_of_regional_reanalysis_project_uerra
+          | :uncertainties_in_ensembles_of_regional_reanalysis_project_uerra_test
+          | :reserved
+          | :reserved_for_local_use
+          | :missing
+
+  @spec get(id()) :: t()
   def get(0), do: :operational_products
   def get(1), do: :operational_test_products
   def get(2), do: :research_products

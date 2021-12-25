@@ -11,7 +11,19 @@ defmodule ExGrib.Grib2 do
   alias ExGrib.Grib2.ProductionStatus
   alias ExGrib.Grib2.SubCentre
 
-  @spec header(binary()) :: {:ok, atom(), integer(), binary()} | :error
+  @type file_size :: integer()
+  @type local_version :: integer()
+  @type section_number :: integer()
+  @type section_size :: integer()
+  @type reference_time_significance :: integer()
+  @type year() :: integer()
+  @type month() :: integer()
+  @type day() :: integer()
+  @type hour() :: integer()
+  @type minute() :: integer()
+  @type second() :: integer()
+
+  @spec header(binary()) :: {:ok, Discipline.t(), file_size(), binary()} | :error
   def header(
         <<"GRIB", _reserved::binary-size(2), discipline, 2, file_size::integer-size(64),
           rest::binary>>
@@ -22,8 +34,9 @@ defmodule ExGrib.Grib2 do
   def header(_), do: :error
 
   @spec identification(binary()) ::
-          {:ok, integer(), integer(), atom(), atom(), integer(), atom(), integer(), integer(),
-           integer(), integer(), integer(), integer(), atom(), atom(), integer()}
+          {:ok, section_size(), section_number(), Centre.t(), SubCentre.t(), local_version(),
+           reference_time_significance(), year(), month(), day(), hour(), minute(), second(),
+           ProductionStatus.t(), GribType.t(), binary()}
           | :error
   def identification(<<
         size::integer-size(32),

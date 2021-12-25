@@ -5,7 +5,20 @@ defmodule ExGrib.Grib2.Discipline do
   https://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_doc/grib2_table0-0.shtml
   """
 
-  @spec get(integer()) :: atom()
+  @type id :: integer()
+  @type t ::
+          :meteorological
+          | :hydrological
+          | :land_surface
+          | :satellite_remote_sensing
+          | :space_weather
+          | :reserved
+          | :oceanographic
+          | :reserved
+          | :reserved_for_local_use
+          | :missing
+
+  @spec get(id()) :: t()
   def get(0), do: :meteorological
   def get(1), do: :hydrological
   def get(2), do: :land_surface

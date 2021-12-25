@@ -5,8 +5,23 @@ defmodule ExGrib.Grib2.GribType do
   https://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_doc/grib2_table1-4.shtml
   """
 
-  @typep type_id :: integer()
-  @spec get(type_id()) :: atom()
+  @type id :: integer()
+  @type t ::
+          :analysis_products
+          | :forecast_products
+          | :analysis_and_forecast_products
+          | :control_forecast_products
+          | :perturbed_forecast_products
+          | :control_and_perturbed_forecast_products
+          | :processed_satellite_observations
+          | :processed_radar_observations
+          | :event_probability
+          | :reserved
+          | :experimental_products
+          | :reserved_for_local_use
+          | :missing
+
+  @spec get(id()) :: t()
   def get(0), do: :analysis_products
   def get(1), do: :forecast_products
   def get(2), do: :analysis_and_forecast_products
