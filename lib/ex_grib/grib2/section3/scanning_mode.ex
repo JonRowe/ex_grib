@@ -32,7 +32,7 @@ defmodule ExGrib.Grib2.Section3.ScanningMode do
              column_points: :nj | :nj_minus_one
            }
 
-  @type input :: binary()
+  @type input :: byte()
   @type t :: {:ok, scanning_direction()} | :error
 
   # direction(), direction(), :i_consecutive | :j_consecutive, :rows_scan_same_direction | :rows_scan_opposite_direction}
