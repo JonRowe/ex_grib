@@ -10,6 +10,7 @@ defmodule ExGrib.Grib2 do
   alias ExGrib.Grib2.GribType
   alias ExGrib.Grib2.ProductionStatus
   alias ExGrib.Grib2.ReferenceTime
+  alias ExGrib.Grib2.Section3
   alias ExGrib.Grib2.SubCentre
 
   @type file_size :: integer()
@@ -90,4 +91,7 @@ defmodule ExGrib.Grib2 do
   end
 
   def local_use(_), do: :error
+
+  @spec grid_definition(Section3.input()) :: Section3.t()
+  def grid_definition(binary), do: Section3.parse(binary)
 end

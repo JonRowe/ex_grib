@@ -2,6 +2,7 @@ defmodule ExGrib.Grib2Test do
   use ExUnit.Case
 
   alias ExGrib.Grib2
+  alias ExGrib.Grib2.Section3.Templates.LatitudeLongitude
 
   import ExGrib.Test.File, only: [file_contents: 1]
 
@@ -43,6 +44,43 @@ defmodule ExGrib.Grib2Test do
 
     test "it errors on an unrecognised section" do
       assert :error = Grib2.local_use(<<"NOTAGRIB">>)
+    end
+  end
+
+  describe "grid_definition/1" do
+    test "it returns grib definition data" do
+      {:ok, _, _, next} = Grib2.header(file_contents("gfs_25km.grb2"))
+      {:ok, _, _, _, _, _, _, _, _, _, _, _, _, _, _, next} = Grib2.identification(next)
+      {:ok, rest} = Grib2.local_use(next)
+
+      {:ok, :grib_template, 9, :no_attached_list, %LatitudeLongitude{} = template, "", _} =
+        Grib2.grid_definition(rest)
+
+      assert %LatitudeLongitude{
+               basic_angle: 0,
+               basic_angle_subdivisions: 0,
+               d_i: 250_000,
+               d_j: 250_000,
+               first_point_latitude: 51_000_000,
+               first_point_longitude: 358_500_000,
+               last_point_latitude: 50_500_000,
+               last_point_longitude: 359_000_000,
+               major_axis_scale_factor: 0,
+               major_axis_scale_value: 0,
+               minor_axis_scale_factor: 0,
+               minor_axis_scale_value: 0,
+               n_i: 3,
+               n_j: 3,
+               radius_scale_factor: 0,
+               radius_scale_value: 0,
+               resolution_and_component_flag: 48,
+               scanning_mode: :error,
+               shape_of_the_earth: :spherical_2
+             } = template
+    end
+
+    test "it errors on an unrecognised section" do
+      assert :error = Grib2.grid_definition(<<"NOTAGRIB">>)
     end
   end
 end
