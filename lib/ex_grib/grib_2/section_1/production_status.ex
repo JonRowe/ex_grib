@@ -1,4 +1,4 @@
-defmodule ExGrib.Grib2.ProductionStatus do
+defmodule ExGrib.Grib2.Section1.ProductionStatus do
   @moduledoc """
   Production status of data.
 

@@ -1,4 +1,4 @@
-defmodule ExGrib.Grib2.Centre do
+defmodule ExGrib.Grib2.Section1.Centre do
   @moduledoc """
   Returns the name of the national / international originating
   centre (assigned by the WMO) from an integer in the GRIB.

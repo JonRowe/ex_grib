@@ -1,4 +1,4 @@
-defmodule ExGrib.Grib2.ReferenceTime do
+defmodule ExGrib.Grib2.Section1.ReferenceTime do
   @moduledoc """
   Significance of reference time values.
 

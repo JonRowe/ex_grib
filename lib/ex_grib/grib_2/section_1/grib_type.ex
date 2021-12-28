@@ -1,4 +1,4 @@
-defmodule ExGrib.Grib2.GribType do
+defmodule ExGrib.Grib2.Section1.GribType do
   @moduledoc """
   Grib type.
 

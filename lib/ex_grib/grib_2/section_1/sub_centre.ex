@@ -1,4 +1,4 @@
-defmodule ExGrib.Grib2.SubCentre do
+defmodule ExGrib.Grib2.Section1.SubCentre do
   @moduledoc """
   Returns an originating sub-centre as assigned by the nation,
   looked up from an integer in the GRIB.
@@ -6,7 +6,7 @@ defmodule ExGrib.Grib2.SubCentre do
   https://www.nco.ncep.noaa.gov/pmb/docs/on388/tablec.html
   """
 
-  alias ExGrib.Grib2.Centre
+  alias ExGrib.Grib2.Section1.Centre
 
   @type id :: integer()
   @type t ::
