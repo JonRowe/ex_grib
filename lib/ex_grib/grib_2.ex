@@ -5,22 +5,15 @@ defmodule ExGrib.Grib2 do
   See: https://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_doc/
   """
 
-  alias ExGrib.Grib2.Discipline
+  alias ExGrib.Grib2.Section0
   alias ExGrib.Grib2.Section1
   alias ExGrib.Grib2.Section3
 
-  @type file_size :: integer()
   @type section_number :: integer()
   @type section_size :: integer()
-  @spec header(binary()) :: {:ok, Discipline.t(), file_size(), binary()} | :error
-  def header(
-        <<"GRIB", _reserved::binary-size(2), discipline, 2, file_size::integer-size(64),
-          rest::binary>>
-      ) do
-    {:ok, Discipline.get(discipline), file_size, rest}
-  end
 
-  def header(_), do: :error
+  @spec header(Section0.input()) :: Section0.t()
+  def header(input), do: Section0.parse(input)
 
   @spec identification(Section1.input()) :: Section1.t()
   def identification(input), do: Section1.parse(input)

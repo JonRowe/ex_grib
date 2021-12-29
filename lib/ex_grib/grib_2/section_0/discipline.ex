@@ -1,4 +1,4 @@
-defmodule ExGrib.Grib2.Discipline do
+defmodule ExGrib.Grib2.Section0.Discipline do
   @moduledoc """
   Returns disciplines looked up from a Grib integer.
 
