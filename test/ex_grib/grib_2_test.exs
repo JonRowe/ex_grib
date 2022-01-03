@@ -3,6 +3,7 @@ defmodule ExGrib.Grib2Test do
 
   alias ExGrib.Grib2
   alias ExGrib.Grib2.Section3.Templates.LatitudeLongitude
+  alias ExGrib.Grib2.Section4.Templates.AnalysisOrForecast
 
   import ExGrib.Test.File, only: [file_contents: 1]
 
@@ -81,6 +82,39 @@ defmodule ExGrib.Grib2Test do
 
     test "it errors on an unrecognised section" do
       assert :error = Grib2.grid_definition(<<"NOTAGRIB">>)
+    end
+  end
+
+  describe "product_definition/1" do
+    test "it returns production definition data" do
+      {:ok, _, _, next} = Grib2.header(file_contents("gfs_25km.grb2"))
+      {:ok, _, _, _, _, _, _, _, _, _, _, _, _, _, _, next} = Grib2.identification(next)
+      {:ok, next} = Grib2.local_use(next)
+      {:ok, _, _, _, _, _, next} = Grib2.grid_definition(next)
+
+      assert {:ok, 0, template, "", _} = Grib2.product_definition(next)
+
+      assert %AnalysisOrForecast{
+               analysis_or_forecast_generating_process_identified: 96,
+               background_generating_process_identifier: 0,
+               forecast_time_in_units_defined_by_octet: 0,
+               hours_of_observational_data_cutoff_after_reference_time: 0,
+               indicator_of_unit_of_time_range: 1,
+               minutes_of_observational_data_cutoff_after_reference_time: 0,
+               parameter_category: 2,
+               parameter_number: 2,
+               scale_factor_of_first_fixed_surface: 0,
+               scale_factor_of_second_fixed_surface: 0,
+               scaled_value_of_first_fixed_surface: 10,
+               scaled_value_of_second_fixed_surfaces: 0,
+               type_of_first_fixed_surface: 103,
+               type_of_generating_process: 2,
+               type_of_second_fixed_surfaced: 255
+             } == template
+    end
+
+    test "it errors on an unrecognised section" do
+      assert :error = Grib2.product_definition(<<"NOTAGRIB">>)
     end
   end
 end
