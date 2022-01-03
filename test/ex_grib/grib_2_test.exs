@@ -4,6 +4,7 @@ defmodule ExGrib.Grib2Test do
   alias ExGrib.Grib2
   alias ExGrib.Grib2.Section3.Templates.LatitudeLongitude
   alias ExGrib.Grib2.Section4.Templates.AnalysisOrForecast
+  alias ExGrib.Grib2.Section5.Templates.GridPointDataSimplePacking
 
   import ExGrib.Test.File, only: [file_contents: 1]
 
@@ -115,6 +116,30 @@ defmodule ExGrib.Grib2Test do
 
     test "it errors on an unrecognised section" do
       assert :error = Grib2.product_definition(<<"NOTAGRIB">>)
+    end
+  end
+
+  describe "data_representation/1" do
+    test "it returns data representation data" do
+      {:ok, _, _, next} = Grib2.header(file_contents("gfs_25km.grb2"))
+      {:ok, _, _, _, _, _, _, _, _, _, _, _, _, _, _, next} = Grib2.identification(next)
+      {:ok, next} = Grib2.local_use(next)
+      {:ok, _, _, _, _, _, next} = Grib2.grid_definition(next)
+      {:ok, _, _, _, next} = Grib2.product_definition(next)
+
+      assert {:ok, 9, template, _} = Grib2.data_representation(next)
+
+      assert %GridPointDataSimplePacking{
+               binary_scale_factor: 32773,
+               decimal_scale_factor: 0,
+               number_of_packing_bits: 8,
+               reference_value: 1_078_565_273,
+               type_of_original_field_values: 0
+             } == template
+    end
+
+    test "it errors on an unrecognised section" do
+      assert :error = Grib2.data_representation(<<"NOTAGRIB">>)
     end
   end
 end
