@@ -2,17 +2,18 @@ defmodule ExGrib.Grib2.Section0 do
   @moduledoc """
   Section 0 contains the header for a Grib file.
 
+  Indicator section
+
   https://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_doc/grib2_sect0.shtml
   """
 
   alias ExGrib.Grib2.Section0.Discipline
 
-  @type file_size :: integer()
+  defstruct discipline: :not_parsed, file_size: :not_parsed
 
+  @type file_size :: integer()
   @type input :: binary()
-  @type t ::
-          {:ok, Discipline.t(), file_size(), binary()}
-          | :error
+  @type t :: {:ok, %__MODULE__{discipline: Discipline.t(), file_size: file_size()}} | :error
 
   @spec parse(input()) :: t()
   def parse(<<
@@ -23,7 +24,7 @@ defmodule ExGrib.Grib2.Section0 do
         file_size::integer-size(64),
         rest::binary
       >>) do
-    {:ok, Discipline.get(discipline), file_size, rest}
+    {:ok, %__MODULE__{discipline: Discipline.get(discipline), file_size: file_size}, rest}
   end
 
   def parse(_), do: :error

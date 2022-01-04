@@ -2,6 +2,8 @@ defmodule ExGrib.Grib2.Section3 do
   @moduledoc """
   Section 3 contains information about grid definition.
 
+  Grid definition section
+
   Notes:
 
   1. If octet 6 (source_id) is not zero, octets 15-xx (15-nn if octet 11 is zero) may not be supplied.
@@ -27,42 +29,63 @@ defmodule ExGrib.Grib2.Section3 do
   https://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_doc/grib2_sect3.shtml
   """
 
+  defstruct interpetation_of_optional_list: :not_parsed,
+            number_of_data_points: :not_parsed,
+            optional_list: :not_parsed,
+            source: :not_parsed,
+            template: :not_parsed
+
   alias ExGrib.Grib2.Section3.GridTemplate, as: Template
   alias ExGrib.Grib2.Section3.InterpretationOfListOfNumbers, as: Interpretation
   alias ExGrib.Grib2.Section3.SourceOfGridDefinition, as: GribSource
 
+  @typep section ::
+           %__MODULE__{
+             interpetation_of_optional_list: Interpretation.t(),
+             number_of_data_points: integer(),
+             optional_list: list() | nil,
+             source: GribSource.t(),
+             template: Template.t()
+           }
   @type input :: binary()
-  @type t ::
-          {:ok, GribSource.t(), integer(), Interpretation.t(), Template.t(), binary(), binary()}
-          | :error
+  @type t :: {:ok, section(), binary()} | :error
 
+  @spec parse(input()) :: t()
   def parse(<<
-        # Section size in octets
+        # Length of the section in octets (nn)
         section_size::integer-size(32),
-        # section number
+        # Number of the section (3)
         3,
-        # grib source
+        # Source of grid definition (See Table 3.0) (See note 1 below)
         source_id::integer(),
         # number of data points in template
         number_of_data_points::integer-size(32),
-
-        # number of octets in additional list if any
+        # Number of octets for optional list of numbers defining number of points (See note 2)
         _number_of_octets::integer(),
-        # how to interpret the list of numbers
+        # Interpetation of list of numbers defining number of points (See Table 3.11)
         interpretation_id::integer(),
-        # the template used to define the grid
+        # Grid definition template number (= N) (See Table 3.1)
         grid_template::integer-size(16),
         more::binary()
       >>) do
     remaining_octets = section_size - 14
 
+    # Grid definition template (See Template 3.N where N is the grid definition template number given in octets 13-14)
+    # Optional list of numbers defining number of points (See notes 2 3 and 4 below)
     <<template_and_additional_list::binary-size(remaining_octets), rest::binary()>> = more
 
     {:ok, template, additional_list} =
       Template.get(grid_template).get(template_and_additional_list)
 
-    {:ok, GribSource.get(source_id), number_of_data_points, Interpretation.get(interpretation_id),
-     template, additional_list, rest}
+    section = %__MODULE__{
+      interpetation_of_optional_list: Interpretation.get(interpretation_id),
+      number_of_data_points: number_of_data_points,
+      optional_list: additional_list,
+      source: GribSource.get(source_id),
+      template: template
+    }
+
+    {:ok, section, rest}
   end
 
   def parse(_), do: :error

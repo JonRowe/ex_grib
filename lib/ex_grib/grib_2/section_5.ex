@@ -7,10 +7,18 @@ defmodule ExGrib.Grib2.Section5 do
   https://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_doc/grib2_sect5.shtml
   """
 
-  @type input :: binary()
-  @type t :: {:ok, integer(), Template.t(), binary()} | :error
-
   alias ExGrib.Grib2.Section5.DataRepresentationTemplateNumber, as: Template
+
+  defstruct number_of_data_points_with_values_in_section_7: :not_parsed, template: :not_parsed
+
+  @type input :: binary()
+  @type section ::
+          %__MODULE__{
+            number_of_data_points_with_values_in_section_7: integer(),
+            template: Template.t()
+          }
+
+  @type t :: {:ok, section(), binary()} | :error
 
   @spec parse(input()) :: t()
   def parse(<<
@@ -31,7 +39,13 @@ defmodule ExGrib.Grib2.Section5 do
         module -> module.get(more)
       end
 
-    {:ok, number_of_data_points_specified_in_section_7, template, rest}
+    section = %__MODULE__{
+      number_of_data_points_with_values_in_section_7:
+        number_of_data_points_specified_in_section_7,
+      template: template
+    }
+
+    {:ok, section, rest}
   end
 
   def parse(_), do: :error

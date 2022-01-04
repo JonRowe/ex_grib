@@ -6,20 +6,21 @@ defmodule ExGrib.Grib2.Section6 do
 
   Notes:
 
-  1.  If octet 6 is not zero, the length of this section is 6 and
-  octets 7-nn are not present.
+  1. If octet 6 is not zero, the length of this section is 6 and
+    octets 7-nn are not present.
 
   https://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_doc/grib2_sect6.shtml
   """
 
+  defstruct bit_map_data: :not_parsed, bit_map_indicator: :not_parsed
+
   alias ExGrib.Grib2.Section6.BitMapIndicator
 
+  @typep section :: %__MODULE__{bit_map_data: bitmap(), bit_map_indicator: BitMapIndicator.t()}
+
   @type input :: binary()
-  @type bitmap :: binary()
-  @type t ::
-          {:ok, BitMapIndicator.t(), bitmap(), binary()}
-          | {:ok, BitMapIndicator.t(), binary()}
-          | :error
+  @type bitmap :: binary() | :none
+  @type t :: {:ok, section(), binary()} | :error
 
   @spec parse(input()) :: t()
   def parse(<<
@@ -33,13 +34,17 @@ defmodule ExGrib.Grib2.Section6 do
       >>) do
     size = length_of_the_section_in_octets - 6
     <<bitmap::binary-size(size), rest::binary()>> = more
-    {:ok, BitMapIndicator.get(0), bitmap, rest}
+    {:ok, make_struct(bitmap, 0), rest}
   end
 
   # See Note 1.
   def parse(<<0, 0, 0, 6, 6, bitmap_indicator, rest::binary()>>) do
-    {:ok, BitMapIndicator.get(bitmap_indicator), rest}
+    {:ok, make_struct(:none, bitmap_indicator), rest}
   end
 
   def parse(_), do: :error
+
+  defp make_struct(data, bitmap_indicator) do
+    %__MODULE__{bit_map_data: data, bit_map_indicator: BitMapIndicator.get(bitmap_indicator)}
+  end
 end

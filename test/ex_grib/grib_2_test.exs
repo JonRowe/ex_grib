@@ -2,6 +2,14 @@ defmodule ExGrib.Grib2Test do
   use ExUnit.Case
 
   alias ExGrib.Grib2
+  alias ExGrib.Grib2.Section0
+  alias ExGrib.Grib2.Section1
+  alias ExGrib.Grib2.Section2
+  alias ExGrib.Grib2.Section3
+  alias ExGrib.Grib2.Section4
+  alias ExGrib.Grib2.Section5
+  alias ExGrib.Grib2.Section6
+  alias ExGrib.Grib2.Section7
   alias ExGrib.Grib2.Section3.Templates.LatitudeLongitude
   alias ExGrib.Grib2.Section4.Templates.AnalysisOrForecast
   alias ExGrib.Grib2.Section5.Templates.GridPointDataSimplePacking
@@ -12,7 +20,8 @@ defmodule ExGrib.Grib2Test do
 
   describe "header/1" do
     test "it returns the header of the grib" do
-      assert {:ok, :meteorological, 188, _} = Grib2.header(file_contents("gfs_25km.grb2"))
+      assert {:ok, %Section0{discipline: :meteorological, file_size: 188}, _} =
+               Grib2.header(file_contents("gfs_25km.grb2"))
     end
 
     test "it errors on unrecognised headers" do
@@ -22,8 +31,23 @@ defmodule ExGrib.Grib2Test do
 
   describe "identification/1" do
     test "it returns the identification details of the grib" do
-      {:ok, 21, 1, _, :unknown, 1, _, 2021, 12, 12, 12, 0, 0, _, _, _} =
-        Grib2.identification(file_contents("gfs_25km.grb2", skip: [octets: 16]))
+      assert {:ok, section, _} =
+               Grib2.identification(file_contents("gfs_25km.grb2", skip: [octets: 16]))
+
+      assert %Section1{
+               centre: :us_national_weather_service_ncep_wmc,
+               sub_centre: :unknown,
+               local_version: 1,
+               significance_of_reference_time: :start_of_forecast,
+               year: 2021,
+               month: 12,
+               day: 12,
+               hour: 12,
+               minute: 0,
+               second: 0,
+               production_status: :operational_products,
+               type: :forecast_products
+             } == section
     end
 
     test "it errors on an unrecognised section" do
@@ -32,13 +56,14 @@ defmodule ExGrib.Grib2Test do
   end
 
   describe "local_use/1" do
-    test "it skips the local use section" do
-      assert {:ok, "NEXT"} = Grib2.local_use(<<0, 0, 0, 10, 2, "LOCAL", "NEXT">>)
+    test "it captures the local use section" do
+      assert {:ok, %Section2{local: "LOCAL"}, "NEXT"} =
+               Grib2.local_use(<<0, 0, 0, 10, 2, "LOCAL", "NEXT">>)
     end
 
     test "it works with our sample file" do
       file = file_contents("gfs_25km.grb2", skip: [octets: 37])
-      {:ok, ^file} = Grib2.local_use(file)
+      {:ok, :not_present, ^file} = Grib2.local_use(file)
     end
 
     test "it errors on an unrecognised section" do
@@ -48,8 +73,16 @@ defmodule ExGrib.Grib2Test do
 
   describe "grid_definition/1" do
     test "it returns grib definition data" do
-      {:ok, :grib_template, 9, :no_attached_list, %LatitudeLongitude{} = template, "", _} =
-        Grib2.grid_definition(file_contents("gfs_25km.grb2", skip: [octets: 37]))
+      assert {:ok, section, _} =
+               Grib2.grid_definition(file_contents("gfs_25km.grb2", skip: [octets: 37]))
+
+      assert %Section3{
+               interpetation_of_optional_list: :no_attached_list,
+               number_of_data_points: 9,
+               optional_list: "",
+               source: :grib_template,
+               template: %LatitudeLongitude{} = template
+             } = section
 
       assert %LatitudeLongitude{
                basic_angle: 0,
@@ -81,8 +114,14 @@ defmodule ExGrib.Grib2Test do
 
   describe "product_definition/1" do
     test "it returns production definition data" do
-      assert {:ok, 0, template, "", _} =
+      assert {:ok, section, _} =
                Grib2.product_definition(file_contents("gfs_25km.grb2", skip: [octets: 109]))
+
+      assert %Section4{
+               number_of_coordinate_values: 0,
+               optional_list: "",
+               template: %AnalysisOrForecast{} = template
+             } = section
 
       assert %AnalysisOrForecast{
                analysis_or_forecast_generating_process_identified: 96,
@@ -110,8 +149,13 @@ defmodule ExGrib.Grib2Test do
 
   describe "data_representation/1" do
     test "it returns data representation data" do
-      assert {:ok, 9, template, _} =
+      assert {:ok, section, _} =
                Grib2.data_representation(file_contents("gfs_25km.grb2", skip: [octets: 143]))
+
+      assert %Section5{
+               number_of_data_points_with_values_in_section_7: 9,
+               template: %GridPointDataSimplePacking{} = template
+             } = section
 
       assert %GridPointDataSimplePacking{
                binary_scale_factor: 32773,
@@ -129,12 +173,12 @@ defmodule ExGrib.Grib2Test do
 
   describe "bitmap/1" do
     test "it returns bitmap data" do
-      assert {:ok, :bit_map_attached, "bitmap", "rest"} =
-               Grib2.bitmap(<<0, 0, 0, 12, 6, 0, "bitmap", "rest">>)
+      assert {:ok, %Section6{bit_map_data: "bitmap", bit_map_indicator: :bit_map_attached},
+              "rest"} = Grib2.bitmap(<<0, 0, 0, 12, 6, 0, "bitmap", "rest">>)
     end
 
     test "a grib with no bitmap will skip the bitmap data" do
-      assert {:ok, :bit_map_does_not_apply, _} =
+      assert {:ok, %Section6{bit_map_data: :none, bit_map_indicator: :bit_map_does_not_apply}, _} =
                Grib2.bitmap(file_contents("gfs_25km.grb2", skip: [octets: 164]))
     end
 
@@ -145,7 +189,8 @@ defmodule ExGrib.Grib2Test do
 
   describe "data/1" do
     test "it returns data" do
-      assert {:ok, _, _} = Grib2.data(file_contents("gfs_25km.grb2", skip: [octets: 170]))
+      assert {:ok, %Section7{}, _} =
+               Grib2.data(file_contents("gfs_25km.grb2", skip: [octets: 170]))
     end
 
     test "it errors on an unrecognised section" do
