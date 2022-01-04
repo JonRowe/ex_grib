@@ -200,6 +200,10 @@ defmodule ExGrib.Grib2Test do
 
   describe "footer/1" do
     test "it returns :ok if a valid end of file" do
+      assert {:ok, :end_of_file} = Grib2.footer("7777")
+    end
+
+    test "it returns {:ok, :more_data, data} if a valid end of grib but not end of file" do
       assert {:ok, :more_data, _} =
                Grib2.footer(file_contents("gfs_25km.grb2", skip: [octets: 184]))
     end
