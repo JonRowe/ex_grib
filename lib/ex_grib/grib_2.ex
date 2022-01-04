@@ -13,6 +13,7 @@ defmodule ExGrib.Grib2 do
   alias ExGrib.Grib2.Section5
   alias ExGrib.Grib2.Section6
   alias ExGrib.Grib2.Section7
+  alias ExGrib.Grib2.Section8
 
   @type section_number :: integer()
   @type section_size :: integer()
@@ -40,4 +41,7 @@ defmodule ExGrib.Grib2 do
 
   @spec data(Section7.input()) :: Section7.t()
   def data(binary), do: Section7.parse(binary)
+
+  @spec footer(Section8.input()) :: Section8.t()
+  def footer(binary), do: Section8.parse(binary)
 end

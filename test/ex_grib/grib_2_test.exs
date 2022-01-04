@@ -181,4 +181,22 @@ defmodule ExGrib.Grib2Test do
       assert :error = Grib2.data(<<"NOTAGRIB">>)
     end
   end
+
+  describe "footer/1" do
+    test "it returns :ok if a valid end of file" do
+      {:ok, _, _, next} = Grib2.header(file_contents("gfs_25km.grb2"))
+      {:ok, _, _, _, _, _, _, _, _, _, _, _, _, _, _, next} = Grib2.identification(next)
+      {:ok, next} = Grib2.local_use(next)
+      {:ok, _, _, _, _, _, next} = Grib2.grid_definition(next)
+      {:ok, _, _, _, next} = Grib2.product_definition(next)
+      {:ok, _, _, next} = Grib2.data_representation(next)
+      {:ok, _, next} = Grib2.bitmap(next)
+      {:ok, _, last} = Grib2.data(next)
+      assert {:ok, :more_data, _} = Grib2.footer(last)
+    end
+
+    test "it errors on an unrecognised section" do
+      assert :error = Grib2.footer(<<"NOTAGRIB">>)
+    end
+  end
 end
