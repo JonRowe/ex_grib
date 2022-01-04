@@ -6,7 +6,7 @@ defmodule ExGrib.Grib2Test do
   alias ExGrib.Grib2.Section4.Templates.AnalysisOrForecast
   alias ExGrib.Grib2.Section5.Templates.GridPointDataSimplePacking
 
-  import ExGrib.Test.File, only: [file_contents: 1]
+  import ExGrib.Test.File, only: [file_contents: 1, file_contents: 2]
 
   doctest ExGrib.Grib2
 
@@ -22,10 +22,8 @@ defmodule ExGrib.Grib2Test do
 
   describe "identification/1" do
     test "it returns the identification details of the grib" do
-      {:ok, _, _, rest} = Grib2.header(file_contents("gfs_25km.grb2"))
-
       {:ok, 21, 1, _, :unknown, 1, _, 2021, 12, 12, 12, 0, 0, _, _, _} =
-        Grib2.identification(rest)
+        Grib2.identification(file_contents("gfs_25km.grb2", skip: [octets: 16]))
     end
 
     test "it errors on an unrecognised section" do
@@ -39,9 +37,8 @@ defmodule ExGrib.Grib2Test do
     end
 
     test "it works with our sample file" do
-      {:ok, _, _, next} = Grib2.header(file_contents("gfs_25km.grb2"))
-      {:ok, _, _, _, _, _, _, _, _, _, _, _, _, _, _, rest} = Grib2.identification(next)
-      {:ok, ^rest} = Grib2.local_use(rest)
+      file = file_contents("gfs_25km.grb2", skip: [octets: 37])
+      {:ok, ^file} = Grib2.local_use(file)
     end
 
     test "it errors on an unrecognised section" do
@@ -51,12 +48,8 @@ defmodule ExGrib.Grib2Test do
 
   describe "grid_definition/1" do
     test "it returns grib definition data" do
-      {:ok, _, _, next} = Grib2.header(file_contents("gfs_25km.grb2"))
-      {:ok, _, _, _, _, _, _, _, _, _, _, _, _, _, _, next} = Grib2.identification(next)
-      {:ok, rest} = Grib2.local_use(next)
-
       {:ok, :grib_template, 9, :no_attached_list, %LatitudeLongitude{} = template, "", _} =
-        Grib2.grid_definition(rest)
+        Grib2.grid_definition(file_contents("gfs_25km.grb2", skip: [octets: 37]))
 
       assert %LatitudeLongitude{
                basic_angle: 0,
@@ -88,12 +81,8 @@ defmodule ExGrib.Grib2Test do
 
   describe "product_definition/1" do
     test "it returns production definition data" do
-      {:ok, _, _, next} = Grib2.header(file_contents("gfs_25km.grb2"))
-      {:ok, _, _, _, _, _, _, _, _, _, _, _, _, _, _, next} = Grib2.identification(next)
-      {:ok, next} = Grib2.local_use(next)
-      {:ok, _, _, _, _, _, next} = Grib2.grid_definition(next)
-
-      assert {:ok, 0, template, "", _} = Grib2.product_definition(next)
+      assert {:ok, 0, template, "", _} =
+               Grib2.product_definition(file_contents("gfs_25km.grb2", skip: [octets: 109]))
 
       assert %AnalysisOrForecast{
                analysis_or_forecast_generating_process_identified: 96,
@@ -121,13 +110,8 @@ defmodule ExGrib.Grib2Test do
 
   describe "data_representation/1" do
     test "it returns data representation data" do
-      {:ok, _, _, next} = Grib2.header(file_contents("gfs_25km.grb2"))
-      {:ok, _, _, _, _, _, _, _, _, _, _, _, _, _, _, next} = Grib2.identification(next)
-      {:ok, next} = Grib2.local_use(next)
-      {:ok, _, _, _, _, _, next} = Grib2.grid_definition(next)
-      {:ok, _, _, _, next} = Grib2.product_definition(next)
-
-      assert {:ok, 9, template, _} = Grib2.data_representation(next)
+      assert {:ok, 9, template, _} =
+               Grib2.data_representation(file_contents("gfs_25km.grb2", skip: [octets: 143]))
 
       assert %GridPointDataSimplePacking{
                binary_scale_factor: 32773,
@@ -150,14 +134,8 @@ defmodule ExGrib.Grib2Test do
     end
 
     test "a grib with no bitmap will skip the bitmap data" do
-      {:ok, _, _, next} = Grib2.header(file_contents("gfs_25km.grb2"))
-      {:ok, _, _, _, _, _, _, _, _, _, _, _, _, _, _, next} = Grib2.identification(next)
-      {:ok, next} = Grib2.local_use(next)
-      {:ok, _, _, _, _, _, next} = Grib2.grid_definition(next)
-      {:ok, _, _, _, next} = Grib2.product_definition(next)
-      {:ok, _, _, next} = Grib2.data_representation(next)
-
-      assert {:ok, :bit_map_does_not_apply, _} = Grib2.bitmap(next)
+      assert {:ok, :bit_map_does_not_apply, _} =
+               Grib2.bitmap(file_contents("gfs_25km.grb2", skip: [octets: 164]))
     end
 
     test "it errors on an unrecognised section" do
@@ -167,14 +145,7 @@ defmodule ExGrib.Grib2Test do
 
   describe "data/1" do
     test "it returns data" do
-      {:ok, _, _, next} = Grib2.header(file_contents("gfs_25km.grb2"))
-      {:ok, _, _, _, _, _, _, _, _, _, _, _, _, _, _, next} = Grib2.identification(next)
-      {:ok, next} = Grib2.local_use(next)
-      {:ok, _, _, _, _, _, next} = Grib2.grid_definition(next)
-      {:ok, _, _, _, next} = Grib2.product_definition(next)
-      {:ok, _, _, next} = Grib2.data_representation(next)
-      {:ok, _, next} = Grib2.bitmap(next)
-      assert {:ok, _, _} = Grib2.data(next)
+      assert {:ok, _, _} = Grib2.data(file_contents("gfs_25km.grb2", skip: [octets: 170]))
     end
 
     test "it errors on an unrecognised section" do
@@ -184,15 +155,8 @@ defmodule ExGrib.Grib2Test do
 
   describe "footer/1" do
     test "it returns :ok if a valid end of file" do
-      {:ok, _, _, next} = Grib2.header(file_contents("gfs_25km.grb2"))
-      {:ok, _, _, _, _, _, _, _, _, _, _, _, _, _, _, next} = Grib2.identification(next)
-      {:ok, next} = Grib2.local_use(next)
-      {:ok, _, _, _, _, _, next} = Grib2.grid_definition(next)
-      {:ok, _, _, _, next} = Grib2.product_definition(next)
-      {:ok, _, _, next} = Grib2.data_representation(next)
-      {:ok, _, next} = Grib2.bitmap(next)
-      {:ok, _, last} = Grib2.data(next)
-      assert {:ok, :more_data, _} = Grib2.footer(last)
+      assert {:ok, :more_data, _} =
+               Grib2.footer(file_contents("gfs_25km.grb2", skip: [octets: 184]))
     end
 
     test "it errors on an unrecognised section" do
