@@ -212,4 +212,114 @@ defmodule ExGrib.Grib2Test do
       assert :error = Grib2.footer(<<"NOTAGRIB">>)
     end
   end
+
+  describe "parse_all/1" do
+    test "it pulls out all the gribs" do
+      assert {:ok, [%Grib2{} = grib | more_gribs]} =
+               Grib2.parse_all(file_contents("gfs_25km.grb2"))
+
+      assert {:ok, ^grib, _more_data} = Grib2.parse_next(file_contents("gfs_25km.grb2"))
+
+      assert length(more_gribs) == 2293
+    end
+  end
+
+  describe "parse_next/1" do
+    test "it pulls out a grib" do
+      assert {:ok, %Grib2{} = grib, _more_data} = Grib2.parse_next(file_contents("gfs_25km.grb2"))
+
+      assert %Grib2{
+               header: %Section0{discipline: :meteorological, file_size: 188},
+               identification: %Section1{} = section_1,
+               local_use: :not_present,
+               grid_definition: section_3,
+               product_definition: section_4,
+               data_representation: section_5,
+               bitmap: %Section6{bit_map_data: :none, bit_map_indicator: :bit_map_does_not_apply},
+               data: %Section7{}
+             } = grib
+
+      assert %Section1{
+               centre: :us_national_weather_service_ncep_wmc,
+               sub_centre: :unknown,
+               local_version: 1,
+               significance_of_reference_time: :start_of_forecast,
+               year: 2021,
+               month: 12,
+               day: 12,
+               hour: 12,
+               minute: 0,
+               second: 0,
+               production_status: :operational_products,
+               type: :forecast_products
+             } == section_1
+
+      assert %Section3{
+               interpetation_of_optional_list: :no_attached_list,
+               number_of_data_points: 9,
+               optional_list: "",
+               source: :grib_template,
+               template: %LatitudeLongitude{} = section_3_template
+             } = section_3
+
+      assert %LatitudeLongitude{
+               basic_angle: 0,
+               basic_angle_subdivisions: 0,
+               d_i: 250_000,
+               d_j: 250_000,
+               first_point_latitude: 51_000_000,
+               first_point_longitude: 358_500_000,
+               last_point_latitude: 50_500_000,
+               last_point_longitude: 359_000_000,
+               major_axis_scale_factor: 0,
+               major_axis_scale_value: 0,
+               minor_axis_scale_factor: 0,
+               minor_axis_scale_value: 0,
+               n_i: 3,
+               n_j: 3,
+               radius_scale_factor: 0,
+               radius_scale_value: 0,
+               resolution_and_component_flag: 48,
+               scanning_mode: :error,
+               shape_of_the_earth: :spherical_2
+             } = section_3_template
+
+      assert %Section4{
+               number_of_coordinate_values: 0,
+               optional_list: "",
+               template: %AnalysisOrForecast{} = section_4_template
+             } = section_4
+
+      assert %AnalysisOrForecast{
+               analysis_or_forecast_generating_process_identified: 96,
+               background_generating_process_identifier: 0,
+               forecast_time_in_units_defined_by_octet: 0,
+               hours_of_observational_data_cutoff_after_reference_time: 0,
+               indicator_of_unit_of_time_range: 1,
+               minutes_of_observational_data_cutoff_after_reference_time: 0,
+               parameter_category: 2,
+               parameter_number: 2,
+               scale_factor_of_first_fixed_surface: 0,
+               scale_factor_of_second_fixed_surface: 0,
+               scaled_value_of_first_fixed_surface: 10,
+               scaled_value_of_second_fixed_surfaces: 0,
+               type_of_first_fixed_surface: 103,
+               type_of_generating_process: 2,
+               type_of_second_fixed_surfaced: 255
+             } == section_4_template
+
+      assert %Section5{
+               number_of_data_points_with_values_in_section_7: 9,
+               template: %GridPointDataSimplePacking{} = section_5_template
+             } = section_5
+
+      assert %GridPointDataSimplePacking{
+               binary_scale_factor: 32773,
+               decimal_scale_factor: 0,
+               number_of_packing_bits: 8,
+               reference_value: 1_078_565_273,
+               type_of_original_field_values: 0
+             } == section_5_template
+    end
+  end
 end
