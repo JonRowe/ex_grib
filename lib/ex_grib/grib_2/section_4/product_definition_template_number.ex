@@ -95,7 +95,7 @@ defmodule ExGrib.Grib2.Section4.ProductDefinitionTemplateNumber do
   def get(7), do: Templates.AnalysisOrForecastError
 
   # Average accumulation extreme values or other statistically processed values at a horizontal level or in a horizontal layer in a continuous or non-continuous time interval.  (see Template 4.8)
-  def get(8), do: Templates.AverageAccumulationExtremeValuesAtIntervals
+  def get(8), do: Templates.AverageAccumulationAtIntervals
 
   # Probability forecasts at a horizontal level or in a horizontal layer in a continuous or non-continuous time interval.  (see Template 4.9)
   def get(9), do: Templates.ProbabilityForecastsAtIntervals
