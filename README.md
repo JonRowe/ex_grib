@@ -17,7 +17,7 @@ by adding `ex_grib` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:ex_grib, "~> 0.1.0"}
+    {:ex_grib, "~> 0.0.1"}
   ]
 end
 ```
