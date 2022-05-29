@@ -27,4 +27,18 @@ defmodule ExGrib.Grib1Test do
       assert :error = Grib1.header(<<"NOTAGRIB">>)
     end
   end
+
+  describe "parse/1" do
+    test "it pulls out a grib" do
+      assert {:ok, %Grib1{} = grib, _more_data} = Grib1.parse(file_contents("forecast.grb"))
+
+      assert %Grib1{
+               header: %Section0{file_size: 7526},
+               grid_definition: :not_parsed,
+               product_definition: :not_parsed,
+               bitmap: :not_parsed,
+               data: :not_parsed
+             } = grib
+    end
+  end
 end
