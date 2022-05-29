@@ -47,18 +47,8 @@ defmodule ExGrib.Grib2 do
     end
   end
 
-  @spec parse_all(binary()) :: {:ok, list(t())} | :error
-  def parse_all(binary) do
-    with {:ok, grib, more} <- parse_next(binary), {:ok, gribs} <- parse_all(more) do
-      {:ok, [grib | gribs]}
-    else
-      {:ok, grib} -> {:ok, [grib]}
-      :error -> :error
-    end
-  end
-
-  @spec parse_next(binary()) :: {:ok, t(), binary()} | :error
-  def parse_next(binary) do
+  @spec parse(binary()) :: {:ok, t()} | {:ok, t(), binary()} | :error
+  def parse(binary) do
     {binary, %__MODULE__{}}
     |> parse_step(:header, &header/1)
     |> parse_step(:identification, &identification/1)

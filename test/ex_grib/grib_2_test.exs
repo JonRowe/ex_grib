@@ -223,20 +223,9 @@ defmodule ExGrib.Grib2Test do
     end
   end
 
-  describe "parse_all/1" do
-    test "it pulls out all the gribs" do
-      assert {:ok, [%Grib2{} = grib | more_gribs]} =
-               Grib2.parse_all(file_contents("gfs_25km.grb2"))
-
-      assert {:ok, ^grib, _more_data} = Grib2.parse_next(file_contents("gfs_25km.grb2"))
-
-      assert length(more_gribs) == 2293
-    end
-  end
-
-  describe "parse_next/1" do
+  describe "parse/1" do
     test "it pulls out a grib" do
-      assert {:ok, %Grib2{} = grib, _more_data} = Grib2.parse_next(file_contents("gfs_25km.grb2"))
+      assert {:ok, %Grib2{} = grib, _more_data} = Grib2.parse(file_contents("gfs_25km.grb2"))
 
       assert %Grib2{
                header: %Section0{discipline: :meteorological, file_size: 188},
