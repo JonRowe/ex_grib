@@ -4,6 +4,7 @@ defmodule ExGrib.Grib1 do
   """
 
   alias ExGrib.Grib1.Section0
+  alias ExGrib.Grib1.Section1
 
   defstruct header: :not_parsed,
             grid_definition: :not_parsed,
@@ -14,7 +15,7 @@ defmodule ExGrib.Grib1 do
   @type t ::
           %__MODULE__{
             header: Section0.t() | :not_parsed,
-            product_definition: :not_parsed,
+            product_definition: Section1.t() | :not_parsed,
             grid_definition: :not_parsed,
             data: :not_parsed,
             bitmap: :not_parsed
@@ -32,6 +33,7 @@ defmodule ExGrib.Grib1 do
   def parse(binary) do
     {binary, %__MODULE__{}}
     |> parse_step(:header, &header/1)
+    |> parse_step(:product_definition, &product_definition/1)
     |> parse_step(
       :footer,
       fn
@@ -43,6 +45,9 @@ defmodule ExGrib.Grib1 do
 
   @spec header(Section0.input()) :: Section0.t()
   def header(input), do: Section0.parse(input)
+
+  @spec product_definition(Section1.input()) :: Section1.t()
+  def product_definition(binary), do: Section1.parse(binary)
 
   defp parse_step({:error, step}, _, _), do: {:error, step}
 
