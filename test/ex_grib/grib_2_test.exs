@@ -18,6 +18,16 @@ defmodule ExGrib.Grib2Test do
 
   doctest ExGrib.Grib2
 
+  describe "detect/1" do
+    test "it returns true when binary contains a grib2 header" do
+      assert true == Grib2.detect(file_contents("gfs_25km.grb2"))
+    end
+
+    test "it returns false otherwise" do
+      assert false == Grib2.detect(<<"GRIB", 0, 0, 0, 1>>)
+    end
+  end
+
   describe "header/1" do
     test "it returns the header of the grib" do
       assert {:ok, %Section0{discipline: :meteorological, file_size: 188}, _} =

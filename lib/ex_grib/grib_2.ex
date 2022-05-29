@@ -39,6 +39,14 @@ defmodule ExGrib.Grib2 do
             data: Section7.t() | :not_parsed
           }
 
+  @spec detect(binary()) :: boolean()
+  def detect(binary) do
+    case Section0.parse(binary) do
+      {:ok, _, _} -> true
+      :error -> false
+    end
+  end
+
   @spec parse_all(binary()) :: {:ok, list(t())} | :error
   def parse_all(binary) do
     with {:ok, grib, more} <- parse_next(binary), {:ok, gribs} <- parse_all(more) do
