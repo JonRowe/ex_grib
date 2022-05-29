@@ -13,7 +13,9 @@ defmodule ExGrib.Grib2.Section0 do
 
   @type file_size :: integer()
   @type input :: binary()
-  @type t :: {:ok, %__MODULE__{discipline: Discipline.t(), file_size: file_size()}} | :error
+  @type t ::
+          {:ok, %__MODULE__{discipline: Discipline.t(), file_size: file_size()}, binary()}
+          | :error
 
   @spec parse(input()) :: t()
   def parse(<<
