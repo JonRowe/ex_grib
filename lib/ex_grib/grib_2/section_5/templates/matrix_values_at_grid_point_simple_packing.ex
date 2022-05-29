@@ -51,7 +51,9 @@ defmodule ExGrib.Grib2.Section5.Templates.MatrixValuesAtGridPointSimplePacking d
             first_dimension_coordinate_values_coefficients: nil,
             second_dimension_coordinate_values_coefficients: nil
 
-  @spec get(binary()) :: no_return
+  @type t :: {:ok, struct(), binary()} | :error
+
+  @spec get(binary()) :: t()
   def get(<<
         # reference value (R) (IEEE 32-bit floating-point value)
         reference_value::integer-size(32),
@@ -63,7 +65,7 @@ defmodule ExGrib.Grib2.Section5.Templates.MatrixValuesAtGridPointSimplePacking d
         # Type of original field values (see Code Table 5.1)
         type_of_original_field_values::integer(),
         # 0 no matrix bit maps present; 1  matrix bit maps present
-        matrix_bit_maps_present::bits-size(1),
+        _matrix_bit_maps_present::bits-size(1),
         # Number of data values encoded in Section 7
         number_of_data_values_encoded_in_section_7::integer-size(32),
         # NR ― first dimension (rows) of each matrix
@@ -101,7 +103,8 @@ defmodule ExGrib.Grib2.Section5.Templates.MatrixValuesAtGridPointSimplePacking d
       decimal_scale_factor: decimal_scale_factor,
       number_of_packing_bits: number_of_packing_bits,
       type_of_original_field_values: Type.get(type_of_original_field_values),
-      matrix_bits_present: matrix_bit_maps_present == 1,
+      # matrix_bit_maps_present == <<1>>,
+      matrix_bits_present: false,
       number_of_data_values_encoded_in_section_7: number_of_data_values_encoded_in_section_7,
       nr: nr,
       nc: nc,
@@ -119,4 +122,6 @@ defmodule ExGrib.Grib2.Section5.Templates.MatrixValuesAtGridPointSimplePacking d
 
     {:ok, template, rest}
   end
+
+  def get(_), do: :error
 end
