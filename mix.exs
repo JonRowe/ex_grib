@@ -54,6 +54,7 @@ defmodule ExGrib.MixProject do
       source_url: "https://github.com/JonRowe/ex_grib"
     ]
   end
+
   defp package do
     [
       maintainers: ["Jon Rowe"],
