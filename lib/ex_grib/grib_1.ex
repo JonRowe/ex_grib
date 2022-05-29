@@ -5,6 +5,7 @@ defmodule ExGrib.Grib1 do
 
   alias ExGrib.Grib1.Section0
   alias ExGrib.Grib1.Section1
+  alias ExGrib.Grib1.Section2
 
   defstruct header: :not_parsed,
             grid_definition: :not_parsed,
@@ -16,7 +17,7 @@ defmodule ExGrib.Grib1 do
           %__MODULE__{
             header: Section0.t() | :not_parsed,
             product_definition: Section1.t() | :not_parsed,
-            grid_definition: :not_parsed,
+            grid_definition: Section2.t() | :not_parsed,
             data: :not_parsed,
             bitmap: :not_parsed
           }
@@ -34,6 +35,7 @@ defmodule ExGrib.Grib1 do
     {binary, %__MODULE__{}}
     |> parse_step(:header, &header/1)
     |> parse_step(:product_definition, &product_definition/1)
+    |> parse_step(:grid_definition, &grid_definition/1)
     |> parse_step(
       :footer,
       fn
@@ -49,6 +51,9 @@ defmodule ExGrib.Grib1 do
   @spec product_definition(Section1.input()) :: Section1.t()
   def product_definition(binary), do: Section1.parse(binary)
 
+  @spec grid_definition(Section2.input()) :: Section2.t()
+  def grid_definition(binary), do: Section2.parse(binary)
+
   defp parse_step({:error, step}, _, _), do: {:error, step}
 
   defp parse_step({binary, struct}, :footer, function) do
@@ -57,6 +62,14 @@ defmodule ExGrib.Grib1 do
       {:ok, :more_data, data} -> {:ok, struct, data}
       :error -> :error
     end
+  end
+
+  defp parse_step(
+         {binary, %{product_definition: %{section_1_flags: %{section_2: :ommited}}} = struct},
+         :grid_definition,
+         _
+       ) do
+    {binary, Map.put(struct, :grid_definition, :not_present)}
   end
 
   defp parse_step({binary, struct}, step, function) do
