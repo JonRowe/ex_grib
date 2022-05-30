@@ -8,6 +8,7 @@ defmodule ExGrib.Grib1 do
   alias ExGrib.Grib1.Section2
   alias ExGrib.Grib1.Section3
   alias ExGrib.Grib1.Section4
+  alias ExGrib.Grib1.Section5
 
   defstruct header: :not_parsed,
             grid_definition: :not_parsed,
@@ -40,13 +41,7 @@ defmodule ExGrib.Grib1 do
     |> parse_step(:grid_definition, &grid_definition/1)
     |> parse_step(:bitmap, &bitmap/1)
     |> parse_step(:data, &data/1)
-    |> parse_step(
-      :footer,
-      fn
-        <<>> -> {:ok, :end_of_file}
-        data -> {:ok, :more_data, data}
-      end
-    )
+    |> parse_step(:footer, &footer/1)
   end
 
   @spec header(Section0.input()) :: Section0.t()
@@ -63,6 +58,9 @@ defmodule ExGrib.Grib1 do
 
   @spec data(Section4.input()) :: Section4.t()
   def data(binary), do: Section4.parse(binary)
+
+  @spec footer(Section5.input()) :: Section5.t()
+  def footer(binary), do: Section5.parse(binary)
 
   defp parse_step({:error, step}, _, _), do: {:error, step}
 
