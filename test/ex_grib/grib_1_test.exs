@@ -6,9 +6,11 @@ defmodule ExGrib.Grib1Test do
   alias ExGrib.Grib1.Section1
   alias ExGrib.Grib1.Section2
   alias ExGrib.Grib1.Section3
+  alias ExGrib.Grib1.Section4
   alias ExGrib.Grib1.Table1
   alias ExGrib.Grib1.Table2
   alias ExGrib.Grib1.Table3
+  alias ExGrib.Grib1.Table11
 
   import ExGrib.Test.File, only: [file_contents: 1, file_contents: 2]
 
@@ -110,6 +112,30 @@ defmodule ExGrib.Grib1Test do
     end
   end
 
+  describe "data/1" do
+    test "it returns data" do
+      assert {:ok, %Section4{} = section, _} =
+               Grib1.data(file_contents("forecast.grb", skip: [octets: 68]))
+
+      assert %Section4{
+               binary_scale_factor: -32762,
+               bits_per_value: 16,
+               data_flag: %Table11{
+                 additional_flags_at_section_4_octect_14: false,
+                 grid_or_sphere: :grid,
+                 int_or_float: :float,
+                 simple_or_complex: :simple
+               },
+               reference_value: <<69, 24, 214, 146>>,
+               section_length: 7454
+             } = section
+    end
+
+    test "it errors on an unrecognised section" do
+      assert :error = Grib1.data(<<"NOTAGRIB">>)
+    end
+  end
+
   describe "parse/1" do
     test "it pulls out a grib" do
       assert {:ok, %Grib1{} = grib, _more_data} = Grib1.parse(file_contents("forecast.grb"))
@@ -119,7 +145,7 @@ defmodule ExGrib.Grib1Test do
                grid_definition: section_2,
                product_definition: section_1,
                bitmap: :not_present,
-               data: :not_parsed
+               data: section_4
              } = grib
 
       assert %Section1{
@@ -163,6 +189,19 @@ defmodule ExGrib.Grib1Test do
                pvl_location: 255,
                section_length: 32
              } = section_2
+
+      assert %Section4{
+               binary_scale_factor: -32762,
+               bits_per_value: 16,
+               data_flag: %Table11{
+                 additional_flags_at_section_4_octect_14: false,
+                 grid_or_sphere: :grid,
+                 int_or_float: :float,
+                 simple_or_complex: :simple
+               },
+               reference_value: <<69, 24, 214, 146>>,
+               section_length: 7454
+             } = section_4
     end
   end
 end

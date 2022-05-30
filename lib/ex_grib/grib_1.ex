@@ -7,6 +7,7 @@ defmodule ExGrib.Grib1 do
   alias ExGrib.Grib1.Section1
   alias ExGrib.Grib1.Section2
   alias ExGrib.Grib1.Section3
+  alias ExGrib.Grib1.Section4
 
   defstruct header: :not_parsed,
             grid_definition: :not_parsed,
@@ -20,7 +21,7 @@ defmodule ExGrib.Grib1 do
             product_definition: Section1.t() | :not_parsed,
             grid_definition: Section2.t() | :not_parsed,
             bitmap: Section3.t() | :not_parsed,
-            data: :not_parsed
+            data: Section4.t() | :not_parsed
           }
 
   @spec detect(binary()) :: boolean()
@@ -38,6 +39,7 @@ defmodule ExGrib.Grib1 do
     |> parse_step(:product_definition, &product_definition/1)
     |> parse_step(:grid_definition, &grid_definition/1)
     |> parse_step(:bitmap, &bitmap/1)
+    |> parse_step(:data, &data/1)
     |> parse_step(
       :footer,
       fn
@@ -58,6 +60,9 @@ defmodule ExGrib.Grib1 do
 
   @spec bitmap(Section3.input()) :: Section3.t()
   def bitmap(binary), do: Section3.parse(binary)
+
+  @spec data(Section4.input()) :: Section4.t()
+  def data(binary), do: Section4.parse(binary)
 
   defp parse_step({:error, step}, _, _), do: {:error, step}
 
