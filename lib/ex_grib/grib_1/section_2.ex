@@ -42,7 +42,7 @@ defmodule ExGrib.Grib1.Section2 do
       >>) do
     section = %__MODULE__{
       data_representation_type: Table6.get(data_representation_type),
-      grid_definition: grid_definition,
+      grid_definition: Table6.grid(data_representation_type).parse(grid_definition),
       number_of_vertical_coordinate_values: number_of_vertical_coordinate_values,
       pvl_location: pvl_location,
       section_length: section_length

@@ -5,13 +5,15 @@ defmodule ExGrib.Grib1.Table6 do
   https://apps.ecmwf.int/codes/grib/format/grib1/ctable/6/
   """
 
+  alias ExGrib.Grib1.Grids.LatitudeLongitudeGrid
+
   @type id :: integer()
   @type t ::
           :albers_equal_area_secant_or_tangent_conic_or_bipolar_projection
           | :gaussian_latitude_longitude_grid
           | :gnomonic_projection
           | :lambert_conformal_secant_or_tangent_conic_or_bipolar_projection
-          | :latitude_longitude_grid_equidistant_cylindrical_or_plate_carree_projection
+          | :latitude_longitude_grid
           | :mercator_projection
           | :millers_cylindrical_projection
           | :oblique_lambert_conformal_secant_or_tangent_conic_or_bipolar_projection
@@ -33,7 +35,7 @@ defmodule ExGrib.Grib1.Table6 do
           | :universal_transverse_mercator_projection
 
   @spec get(id()) :: t()
-  def get(0), do: :latitude_longitude_grid_equidistant_cylindrical_or_plate_carree_projection
+  def get(0), do: :latitude_longitude_grid
   def get(1), do: :mercator_projection
   def get(2), do: :gnomonic_projection
   def get(3), do: :lambert_conformal_secant_or_tangent_conic_or_bipolar_projection
@@ -68,4 +70,7 @@ defmodule ExGrib.Grib1.Table6 do
   def get(n) when n >= 91 and n <= 191, do: :reserved
   # See code tables relative to grid definition
   def get(n) when n >= 192 and n <= 254, do: :reserved_for_local_use
+
+  @spec grid(id()) :: module()
+  def grid(0), do: LatitudeLongitudeGrid
 end

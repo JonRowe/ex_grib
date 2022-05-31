@@ -2,6 +2,7 @@ defmodule ExGrib.Grib1Test do
   use ExUnit.Case, async: true
 
   alias ExGrib.Grib1
+  alias ExGrib.Grib1.Grids.LatitudeLongitudeGrid
   alias ExGrib.Grib1.Section0
   alias ExGrib.Grib1.Section1
   alias ExGrib.Grib1.Section2
@@ -83,9 +84,19 @@ defmodule ExGrib.Grib1Test do
                Grib1.grid_definition(file_contents("forecast.grb", skip: [octets: 36]))
 
       assert %Section2{
-               data_representation_type:
-                 :latitude_longitude_grid_equidistant_cylindrical_or_plate_carree_projection,
-               grid_definition: _,
+               data_representation_type: :latitude_longitude_grid,
+               grid_definition: %LatitudeLongitudeGrid{
+                 i_direction_increment: 100,
+                 j_direction_increment: 100,
+                 latitude_of_first_grid_point: 47210,
+                 latitude_of_last_grid_point: 53210,
+                 longitude_of_first_grid_point: -8_381_262,
+                 longitude_of_last_grid_point: -8_387_262,
+                 ni: 61,
+                 nj: 61,
+                 resolution_and_component_flags: 128,
+                 scanning_mode: 64
+               },
                grid_definition_extension: :not_parsed,
                number_of_vertical_coordinate_values: 0,
                pl: :not_parsed,
@@ -179,9 +190,19 @@ defmodule ExGrib.Grib1Test do
              } = section_1
 
       assert %Section2{
-               data_representation_type:
-                 :latitude_longitude_grid_equidistant_cylindrical_or_plate_carree_projection,
-               grid_definition: _,
+               data_representation_type: :latitude_longitude_grid,
+               grid_definition: %LatitudeLongitudeGrid{
+                 i_direction_increment: 100,
+                 j_direction_increment: 100,
+                 latitude_of_first_grid_point: 47210,
+                 latitude_of_last_grid_point: 53210,
+                 longitude_of_first_grid_point: -8_381_262,
+                 longitude_of_last_grid_point: -8_387_262,
+                 ni: 61,
+                 nj: 61,
+                 resolution_and_component_flags: 128,
+                 scanning_mode: 64
+               },
                grid_definition_extension: :not_parsed,
                number_of_vertical_coordinate_values: 0,
                pl: :not_parsed,
