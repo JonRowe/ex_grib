@@ -50,30 +50,28 @@ defmodule ExGrib.Grib1.Table5 do
   """
 
   @type id :: integer()
-  @type(
-    t ::
-      :forecast_or_uninitialized_analysis_or_image_valid_for_reference_time
-      | :initialized_analysis_product
-      | :product_between_reference_time_plus_p1_and_reference_time_plus_p2
-      | :average_reference_plus_p1_to_reference_plus_p2
-      | :difference_p2_p1,
-    :average_reference_minus_p1_to_reference_minus_p2
-    | :average_reference_minus_p1_to_reference_plus_p2
-    | :p1_occupies_octets_19_20
-    | :climatological_mean_value
-    | :average_of_n_forecasts_period_p1_interval_p2_from_reference_time
-    | :average_of_n_forecasts_first_period_p1_intervals_p2
-    | :average_of_n_forecasts_first_period_p1_subsequent_reduced_at_intervals_of_p2
-    | :temporal_variance
-    | :standard_deviation_of_n_forecasts
-    | :average_of_n_analyses
-    | :accumulation_reference_time_plus_p1_to_reference_time_plus_p2
-    | :accumulation_of_n_forecasts_period_p1_interval_p2
-    | :accumulation_of_n_forecasts_period_p1_then_p2
-    | :accumulation_of_n_analyses_p2_interval
-    | :missing
-    | :reserved
-  )
+  @type t ::
+          :forecast_or_uninitialized_analysis_or_image_valid_for_reference_time
+          | :initialized_analysis_product
+          | :product_between_reference_time_plus_p1_and_reference_time_plus_p2
+          | :average_reference_plus_p1_to_reference_plus_p2
+          | :difference_p2_p1
+          | :average_reference_minus_p1_to_reference_minus_p2
+          | :average_reference_minus_p1_to_reference_plus_p2
+          | :p1_occupies_octets_19_20
+          | :climatological_mean_value
+          | :average_of_n_forecasts_period_p1_interval_p2_from_reference_time
+          | :average_of_n_forecasts_first_period_p1_intervals_p2
+          | :average_of_n_forecasts_first_period_p1_subsequent_reduced_at_intervals_of_p2
+          | :temporal_variance
+          | :standard_deviation_of_n_forecasts
+          | :average_of_n_analyses
+          | :accumulation_reference_time_plus_p1_to_reference_time_plus_p2
+          | :accumulation_of_n_forecasts_period_p1_interval_p2
+          | :accumulation_of_n_forecasts_period_p1_then_p2
+          | :accumulation_of_n_analyses_p2_interval
+          | :missing
+          | :reserved
 
   @spec get(id()) :: t()
 
