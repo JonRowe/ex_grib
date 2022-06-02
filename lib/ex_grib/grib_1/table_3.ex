@@ -58,6 +58,7 @@ defmodule ExGrib.Grib1.Table3 do
   @type octet_11 ::
           :altitude_in_metres
           | :altitude_of_top_in_hm
+          | :continue
           | :depth_in_centimetres
           | :depth_in_metres
           | :depth_of_upper_surface_in_cm
@@ -80,36 +81,24 @@ defmodule ExGrib.Grib1.Table3 do
           | :pressure_in_pa
           | :pressure_of_top_in_kpa
           | :pressure_of_top_in_kpa
-          | :satellite_spectral_band_continued
           | :sigma_value_in_1_over_10000
           | :sigma_value_of_top_in_1_over_100
           | :temperature_in_1_over_100_k
 
   @type octet_12 ::
-          :altitude_in_metres_continued
-          | :altitude_of_bottom_in_hm_above_mean_sea_level
-          | :depth_in_centimetres_continued
-          | :depth_in_metres_continued
+          :altitude_of_bottom_in_hm_above_mean_sea_level
+          | :continue
           | :depth_of_lower_surface_surface_in_cm
           | :eta_value_at_bottom_of_layer_in_1_over_100
-          | :eta_value_in_1_over_10000_continued
           | :four_hundred_seventy_five_k_minus_theta_of_bottom_in_k
-          | :height_in_centimetres_continued
-          | :height_in_metres_continued
           | :height_of_bottom_in_hm_above_ground
-          | :level_number_continued
           | :level_number_of_bottom
           | :not_set
           | :one_point_one_minus_sigma_of_bottom
           | :one_thousand_one_hundred_hpa_minus_pressure_of_bottom_in_hpa
           | :one_thousand_one_hundred_hpa_minus_pressure_of_bottom_in_hpa
-          | :potential_temperature_in_k_continued
           | :pressure_difference_from_ground_to_bottom_level_in_hpa
-          | :pressure_difference_in_hpa_from_ground_to_level_continued
-          | :pressure_in_hpa_continued
-          | :pressure_in_pa_continued
           | :pressure_of_bottom_in_kpa
-          | :sigma_value_in_1_over_10000_continued
           | :sigma_value_of_bottom_in_1_over_100
 
   @type t :: %__MODULE__{octet_10: octet_10, octet_11: octet_11, octet_12: octet_12} | :reserved
@@ -152,7 +141,7 @@ defmodule ExGrib.Grib1.Table3 do
     do: %__MODULE__{
       octet_10: :isobaric_surface,
       octet_11: :pressure_in_hpa,
-      octet_12: :pressure_in_hpa_continued
+      octet_12: :continue
     }
 
   def get(101),
@@ -168,7 +157,7 @@ defmodule ExGrib.Grib1.Table3 do
     do: %__MODULE__{
       octet_10: :specified_altitude_above_mean_sea_level,
       octet_11: :altitude_in_metres,
-      octet_12: :altitude_in_metres_continued
+      octet_12: :continue
     }
 
   def get(104),
@@ -182,7 +171,7 @@ defmodule ExGrib.Grib1.Table3 do
     do: %__MODULE__{
       octet_10: :specified_height_level_above_ground,
       octet_11: :height_in_metres,
-      octet_12: :height_in_metres_continued
+      octet_12: :continue
     }
 
   def get(106),
@@ -196,7 +185,7 @@ defmodule ExGrib.Grib1.Table3 do
     do: %__MODULE__{
       octet_10: :sigma_level,
       octet_11: :sigma_value_in_1_over_10000,
-      octet_12: :sigma_value_in_1_over_10000_continued
+      octet_12: :continue
     }
 
   def get(108),
@@ -210,7 +199,7 @@ defmodule ExGrib.Grib1.Table3 do
     do: %__MODULE__{
       octet_10: :hybrid_level,
       octet_11: :level_number,
-      octet_12: :level_number_continued
+      octet_12: :continue
     }
 
   def get(110),
@@ -224,7 +213,7 @@ defmodule ExGrib.Grib1.Table3 do
     do: %__MODULE__{
       octet_10: :depth_below_land_surface,
       octet_11: :depth_in_centimetres,
-      octet_12: :depth_in_centimetres_continued
+      octet_12: :continue
     }
 
   def get(112),
@@ -238,7 +227,7 @@ defmodule ExGrib.Grib1.Table3 do
     do: %__MODULE__{
       octet_10: :isentropic_level,
       octet_11: :potential_temperature_in_k,
-      octet_12: :potential_temperature_in_k_continued
+      octet_12: :continue
     }
 
   def get(114),
@@ -252,7 +241,7 @@ defmodule ExGrib.Grib1.Table3 do
     do: %__MODULE__{
       octet_10: :level_at_specified_pressure_difference,
       octet_11: :pressure_difference_in_hpa_from_ground_to_level,
-      octet_12: :pressure_difference_in_hpa_from_ground_to_level_continued
+      octet_12: :continue
     }
 
   def get(116),
@@ -275,7 +264,7 @@ defmodule ExGrib.Grib1.Table3 do
     do: %__MODULE__{
       octet_10: :eta_level,
       octet_11: :eta_value_in_1_over_10000,
-      octet_12: :eta_value_in_1_over_10000_continued
+      octet_12: :continue
     }
 
   def get(120),
@@ -298,7 +287,7 @@ defmodule ExGrib.Grib1.Table3 do
     do: %__MODULE__{
       octet_10: :specified_height_level_above_ground_high_precision,
       octet_11: :height_in_centimetres,
-      octet_12: :height_in_centimetres_continued
+      octet_12: :continue
     }
 
   def get(126), do: :reserved
@@ -306,7 +295,7 @@ defmodule ExGrib.Grib1.Table3 do
   def get(127),
     do: %__MODULE__{
       octet_10: :satellite_spectral_band,
-      octet_11: :satellite_spectral_band_continued,
+      octet_11: :continue,
       octet_12: :not_set
     }
 
@@ -332,7 +321,7 @@ defmodule ExGrib.Grib1.Table3 do
     do: %__MODULE__{
       octet_10: :depth_below_sea_level,
       octet_11: :depth_in_metres,
-      octet_12: :depth_in_metres_continued
+      octet_12: :continue
     }
 
   def get(n) when n >= 161 and n <= 199, do: :reserved
@@ -355,7 +344,7 @@ defmodule ExGrib.Grib1.Table3 do
     do: %__MODULE__{
       octet_10: :isobaric_surface_high_precision_ecmwf_extension,
       octet_11: :pressure_in_pa,
-      octet_12: :pressure_in_pa_continued
+      octet_12: :continue
     }
 
   def get(n) when n >= 211 and n <= 254, do: :reserved
