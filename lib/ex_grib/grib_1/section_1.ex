@@ -110,11 +110,10 @@ defmodule ExGrib.Grib1.Section1 do
         # Indicator of unit of time range (see Code table 4)
         unit_of_time_range::integer(),
         # P1 Period of time (number of time units) (0 for analyses or initialized analyses). Units of time given by octet 18
-        p1::integer(),
         # P2 Period of time (number of time units); or Time interval between successive analyses, initialized analyses or forecasts, undergoing averaging or accumulation. Units of time given by octet 18
-        p2::integer(),
+        p1_p2::binary-size(2),
         # Time range indicator (see Code table 5)
-        time_range_indicator::integer(),
+        time_range_indicator_flag::integer(),
         # Number included in average, when octet 21 (Code table 5) indicates an average or accumulation; otherwise set to zero
         number_included_in_average::integer-size(16),
         # Number missing from averages or accumulations
@@ -134,6 +133,20 @@ defmodule ExGrib.Grib1.Section1 do
     # 12 are provided, we only care about skipped to the right point currently.
     <<_reserved::binary-size(remaining_octets), rest::binary()>> = more
 
+    time_range_indicator = Table5.get(time_range_indicator_flag)
+
+    {p1, p2} =
+      case time_range_indicator do
+        # :forecast_or_uninitialized_analysis_or_image_valid_for_reference_time ->
+        :p1_occupies_octets_19_20 ->
+          <<p1::integer-size(16)>> = p1_p2
+          {p1, 0}
+
+        _ ->
+          <<p1::integer(), p2::integer()>> = p1_p2
+          {p1, p2}
+      end
+
     section = %__MODULE__{
       section_length: section_length,
       table_version: table_version,
@@ -151,7 +164,7 @@ defmodule ExGrib.Grib1.Section1 do
       unit_of_time_range: Table4.get(unit_of_time_range),
       p1: p1,
       p2: p2,
-      time_range_indicator: Table5.get(time_range_indicator),
+      time_range_indicator: time_range_indicator,
       number_included_in_average: number_included_in_average,
       number_missing_from_averages_or_accumulations:
         number_missing_from_averages_or_accumulations,
