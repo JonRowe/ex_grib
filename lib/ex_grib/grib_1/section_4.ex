@@ -30,7 +30,8 @@ defmodule ExGrib.Grib1.Section4 do
         section_length::integer-size(24),
         # Flag (see Code table 11) (first 4 bits).
         data_flag::binary-size(4)-unit(1),
-        _number_of_unused_bits_at_end_of_section::integer-size(4),
+        # at end of section
+        number_of_unused_bits::integer-size(4),
         binary_scale_factor::signed-integer-size(16),
         # real (minimum of packed values)
         reference_value::binary-size(4),
@@ -38,9 +39,10 @@ defmodule ExGrib.Grib1.Section4 do
         bits_per_value::integer(),
         more::binary()
       >>) do
-    remaining_octets = section_length - 11
+    data_size_in_bits = (section_length - 11) * 8 - number_of_unused_bits
 
-    <<data::binary-size(remaining_octets), rest::binary()>> = more
+    <<data::binary-size(data_size_in_bits)-unit(1),
+      _unused::binary-size(number_of_unused_bits)-unit(1), rest::binary()>> = more
 
     table_11 = Table11.get(data_flag)
 
