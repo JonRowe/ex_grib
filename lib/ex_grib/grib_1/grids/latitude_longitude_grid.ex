@@ -57,10 +57,10 @@ defmodule ExGrib.Grib1.Grids.LatitudeLongitudeGrid do
   end
 
   defp coord(<<0::size(1)-unit(1), value_in_milli_degrees::integer-size(23)-unit(1)>>) do
-    value_in_milli_degrees / 1000.0
+    value_in_milli_degrees
   end
 
   defp coord(<<1::size(1)-unit(1), value_in_milli_degrees::integer-size(23)-unit(1)>>) do
-    -1 * (value_in_milli_degrees / 1000.0)
+    -1 * value_in_milli_degrees
   end
 end
