@@ -2,6 +2,8 @@ defmodule ExGrib.Grib1.Grids.LatitudeLongitudeGrid do
   @moduledoc """
   """
 
+  alias ExGrib.Grib1.Table8
+
   defstruct i_direction_increment: :not_parsed,
             j_direction_increment: :not_parsed,
             latitude_of_first_grid_point: :not_parsed,
@@ -33,7 +35,8 @@ defmodule ExGrib.Grib1.Grids.LatitudeLongitudeGrid do
         # Dj j direction increment
         j_direction_increment::unsigned-size(16),
         # Scanning mode (flags see Flag/Code table 8)
-        scanning_mode::integer(),
+        scanning_mode::binary-size(3)-unit(1),
+        _more_scanning_mode::binary-size(5)-unit(1),
         0,
         0,
         0,
@@ -49,7 +52,7 @@ defmodule ExGrib.Grib1.Grids.LatitudeLongitudeGrid do
       ni: ni,
       nj: nj,
       resolution_and_component_flags: resolution_and_component_flags,
-      scanning_mode: scanning_mode
+      scanning_mode: Table8.get(scanning_mode)
     }
   end
 

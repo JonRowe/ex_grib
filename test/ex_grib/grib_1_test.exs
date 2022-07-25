@@ -11,6 +11,7 @@ defmodule ExGrib.Grib1Test do
   alias ExGrib.Grib1.Table1
   alias ExGrib.Grib1.Table2
   alias ExGrib.Grib1.Table3
+  alias ExGrib.Grib1.Table8
   alias ExGrib.Grib1.Table11
 
   import ExGrib.Test.File, only: [file_contents: 1, file_contents: 2]
@@ -95,7 +96,11 @@ defmodule ExGrib.Grib1Test do
                  ni: 61,
                  nj: 61,
                  resolution_and_component_flags: 128,
-                 scanning_mode: 64
+                 scanning_mode: %Table8{
+                   consecutive_points: :i,
+                   i_direction: :positive,
+                   j_direction: :positive
+                 }
                },
                grid_definition_extension: :not_parsed,
                number_of_vertical_coordinate_values: 0,
@@ -201,7 +206,11 @@ defmodule ExGrib.Grib1Test do
                  ni: 61,
                  nj: 61,
                  resolution_and_component_flags: 128,
-                 scanning_mode: 64
+                 scanning_mode: %Table8{
+                   consecutive_points: :i,
+                   i_direction: :positive,
+                   j_direction: :positive
+                 }
                },
                grid_definition_extension: :not_parsed,
                number_of_vertical_coordinate_values: 0,
