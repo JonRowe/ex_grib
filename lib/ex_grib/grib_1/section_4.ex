@@ -10,11 +10,12 @@ defmodule ExGrib.Grib1.Section4 do
              binary_scale_factor: integer(),
              bits_per_value: integer(),
              data_flag: integer(),
-             reference_value: binary(),
+             reference_value: float(),
              section_length: integer()
            }
   @type t :: {:ok, section()} | :error
 
+  alias ExGrib.Grib1.Data.Float
   alias ExGrib.Grib1.Table11
 
   defstruct binary_scale_factor: :not_parsed,
@@ -34,7 +35,7 @@ defmodule ExGrib.Grib1.Section4 do
         number_of_unused_bits::integer-size(4),
         binary_scale_factor::signed-integer-size(16),
         # real (minimum of packed values)
-        reference_value::binary-size(4),
+        reference_value::binary-size(4)-unit(8),
         # Number of bits containing each packed value
         bits_per_value::integer(),
         more::binary()
@@ -51,7 +52,7 @@ defmodule ExGrib.Grib1.Section4 do
       bits_per_value: bits_per_value,
       data: parse_data(data, bits_per_value, table_11),
       data_flag: table_11,
-      reference_value: reference_value,
+      reference_value: Float.parse(reference_value),
       section_length: section_length
     }
 

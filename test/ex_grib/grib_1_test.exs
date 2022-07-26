@@ -142,7 +142,7 @@ defmodule ExGrib.Grib1Test do
                  int_or_float: :float,
                  simple_or_complex: :simple
                },
-               reference_value: <<69, 24, 214, 146>>,
+               reference_value: 101_737.125,
                section_length: 7454
              } = section
     end
@@ -229,7 +229,7 @@ defmodule ExGrib.Grib1Test do
                  int_or_float: :float,
                  simple_or_complex: :simple
                },
-               reference_value: <<69, 24, 214, 146>>,
+               reference_value: 101_737.125,
                section_length: 7454
              } = section_4
     end
