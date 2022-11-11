@@ -47,7 +47,7 @@ defmodule ExGrib.Grib1Test do
                centre: :missing,
                century_of_reference_time_of_data: 21,
                day: 29,
-               decimal_scale_factor: <<0, 0>>,
+               decimal_scale_factor: 0,
                generating_process_identifier: 74,
                grid_definition: 255,
                hour: 0,
@@ -134,7 +134,7 @@ defmodule ExGrib.Grib1Test do
                Grib1.data(file_contents("forecast.grb", skip: [octets: 68]))
 
       assert %Section4{
-               binary_scale_factor: -32762,
+               binary_scale_factor: -6,
                bits_per_value: 16,
                data_flag: %Table11{
                  additional_flags_at_section_4_octect_14: false,
@@ -168,7 +168,7 @@ defmodule ExGrib.Grib1Test do
                centre: :missing,
                century_of_reference_time_of_data: 21,
                day: 29,
-               decimal_scale_factor: <<0, 0>>,
+               decimal_scale_factor: 0,
                generating_process_identifier: 74,
                grid_definition: 255,
                hour: 0,
@@ -221,7 +221,7 @@ defmodule ExGrib.Grib1Test do
              } = section_2
 
       assert %Section4{
-               binary_scale_factor: -32762,
+               binary_scale_factor: -6,
                bits_per_value: 16,
                data_flag: %Table11{
                  additional_flags_at_section_4_octect_14: false,
