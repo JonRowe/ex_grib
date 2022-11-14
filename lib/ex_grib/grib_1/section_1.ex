@@ -37,7 +37,7 @@ defmodule ExGrib.Grib1.Section1 do
              section_1_flags: Table1.t(),
              indicator_of_parameter: Table2.t(),
              indicator_of_type_of_level: Table3.t(),
-             # _indicator_level::integer-size(16),
+             level: integer(),
              year_of_century: integer(),
              month: integer(),
              day: integer(),
@@ -64,6 +64,7 @@ defmodule ExGrib.Grib1.Section1 do
             hour: :not_parsed,
             indicator_of_parameter: :not_parsed,
             indicator_of_type_of_level: :not_parsed,
+            level: :not_parsed,
             minute: :not_parsed,
             month: :not_parsed,
             number_included_in_average: :not_parsed,
@@ -97,7 +98,7 @@ defmodule ExGrib.Grib1.Section1 do
         # Indicator of type of level (see Code table 3)
         indicator_of_type_of_level::integer(),
         # Height, pressure, etc. of levels (see Code table 3)
-        _indicator_level::integer-size(16),
+        level::integer-size(16),
         # Year of century
         year_of_century::integer(),
         # Month Reference time of data date and time of
@@ -157,6 +158,7 @@ defmodule ExGrib.Grib1.Section1 do
       section_1_flags: Table1.get(section_1_flags),
       indicator_of_parameter: Table2.get(indicator_of_parameter),
       indicator_of_type_of_level: Table3.get(indicator_of_type_of_level),
+      level: level,
       year_of_century: year_of_century,
       month: month,
       day: day,

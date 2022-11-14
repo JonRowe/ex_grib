@@ -57,6 +57,7 @@ defmodule ExGrib.Grib1Test do
                  octet_11: :not_set,
                  octet_12: :not_set
                },
+               level: 0,
                minute: 0,
                month: 5,
                number_included_in_average: 0,
@@ -178,6 +179,7 @@ defmodule ExGrib.Grib1Test do
                  octet_11: :not_set,
                  octet_12: :not_set
                },
+               level: 0,
                minute: 0,
                month: 5,
                number_included_in_average: 0,
