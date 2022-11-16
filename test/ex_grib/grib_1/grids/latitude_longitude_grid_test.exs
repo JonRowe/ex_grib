@@ -10,7 +10,7 @@ defmodule ExGrib.Grib1.Grids.LatitudeLongitudeGridTest do
   test "it produces the correct latitude / longitude details" do
     assert {:ok, message, _more} = Grib1.parse(file_contents("forecast.grb"))
 
-    assert %LatitudeLongitudeGrid{} = definition = message.grid_definition.grid_definition
+    assert %LatitudeLongitudeGrid{} = definition = message.section_2.grid_definition
 
     grid =
       Enum.map(0..3720, fn index ->

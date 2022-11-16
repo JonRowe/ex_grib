@@ -28,43 +28,6 @@ defmodule ExGrib.Grib1Test do
     end
   end
 
-  describe "grid_definition/1" do
-    test "it returns grib definition data" do
-      assert {:ok, section, _} =
-               Grib1.grid_definition(file_contents("forecast.grb", skip: [octets: 36]))
-
-      assert %Section2{
-               data_representation_type: :latitude_longitude_grid,
-               grid_definition: %LatitudeLongitudeGrid{
-                 i_direction_increment: 100,
-                 j_direction_increment: 100,
-                 latitude_of_first_grid_point: 47210,
-                 latitude_of_last_grid_point: 53210,
-                 longitude_of_first_grid_point: -7346,
-                 longitude_of_last_grid_point: -1346,
-                 ni: 61,
-                 nj: 61,
-                 resolution_and_component_flags: 128,
-                 scanning_mode: %Table8{
-                   consecutive_points: :i,
-                   i_direction: :positive,
-                   j_direction: :positive
-                 }
-               },
-               grid_definition_extension: :not_parsed,
-               number_of_vertical_coordinate_values: 0,
-               pl: :not_parsed,
-               pv: :not_parsed,
-               pvl_location: 255,
-               section_length: 32
-             } = section
-    end
-
-    test "it errors on an unrecognised section" do
-      assert :error = Grib1.grid_definition(<<"NOTAGRIB">>)
-    end
-  end
-
   describe "bitmap/1" do
     test "it returns bitmap" do
       # This is junk because this grib doesn't contain a bitmap...
@@ -108,7 +71,7 @@ defmodule ExGrib.Grib1Test do
       assert %Grib1{
                section_0: %Section0{file_size: 7526},
                section_1: section_1,
-               grid_definition: section_2,
+               section_2: section_2,
                bitmap: :not_present,
                data: section_4
              } = grib

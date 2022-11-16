@@ -12,7 +12,7 @@ defmodule ExGrib.Grib1 do
 
   defstruct section_0: :not_parsed,
             section_1: :not_parsed,
-            grid_definition: :not_parsed,
+            section_2: :not_parsed,
             bitmap: :not_parsed,
             data: :not_parsed
 
@@ -20,7 +20,7 @@ defmodule ExGrib.Grib1 do
           %__MODULE__{
             section_0: Section0.t() | :not_parsed,
             section_1: Section1.t() | :not_parsed,
-            grid_definition: Section2.t() | :not_parsed,
+            section_2: Section2.t() | :not_parsed,
             bitmap: Section3.t() | :not_parsed,
             data: Section4.t() | :not_parsed
           }
@@ -38,14 +38,11 @@ defmodule ExGrib.Grib1 do
     {binary, %__MODULE__{}}
     |> parse_step(:section_0, &Section0.parse/1)
     |> parse_step(:section_1, &Section1.parse/1)
-    |> parse_step(:grid_definition, &grid_definition/1)
+    |> parse_step(:section_2, &Section2.parse/1)
     |> parse_step(:bitmap, &bitmap/1)
     |> parse_step(:data, &data/1)
     |> parse_step(:footer, &footer/1)
   end
-
-  @spec grid_definition(Section2.input()) :: Section2.t()
-  def grid_definition(binary), do: Section2.parse(binary)
 
   @spec bitmap(Section3.input()) :: Section3.t()
   def bitmap(binary), do: Section3.parse(binary)
@@ -68,10 +65,10 @@ defmodule ExGrib.Grib1 do
 
   defp parse_step(
          {binary, %{section_1: %{section_1_flags: %{section_2: :ommited}}} = struct},
-         :grid_definition,
+         :section_2,
          _
        ) do
-    {binary, Map.put(struct, :grid_definition, :not_present)}
+    {binary, Map.put(struct, :section_2, :not_present)}
   end
 
   defp parse_step(
