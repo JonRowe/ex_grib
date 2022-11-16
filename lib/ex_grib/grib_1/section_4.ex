@@ -76,14 +76,4 @@ defmodule ExGrib.Grib1.Section4 do
         parse_chunk(data, n)
     end
   end
-
-  # probably not 0 0 but will serve as a point to start when octect 14 does exist
-  defp parse_data(
-         <<0, 0, more_flags::binary-size(1), _data::binary()>>,
-         _n,
-         %Table11{additional_flags_at_section_4_octect_14: true} = flags
-       ) do
-    _table_11 = Table11.get_additional(flags, more_flags)
-    []
-  end
 end
