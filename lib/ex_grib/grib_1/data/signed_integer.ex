@@ -7,4 +7,6 @@ defmodule ExGrib.Grib1.Data.SignedInteger do
   @spec parse(binary()) :: integer()
   def parse(<<0::size(1)-unit(1), value::integer-size(15)-unit(1)>>), do: value
   def parse(<<1::size(1)-unit(1), value::integer-size(15)-unit(1)>>), do: -1 * value
+  def parse(<<0::size(1)-unit(1), value::integer-size(23)-unit(1)>>), do: value
+  def parse(<<1::size(1)-unit(1), value::integer-size(23)-unit(1)>>), do: -1 * value
 end

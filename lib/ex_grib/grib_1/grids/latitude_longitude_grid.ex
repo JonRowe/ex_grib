@@ -2,6 +2,7 @@ defmodule ExGrib.Grib1.Grids.LatitudeLongitudeGrid do
   @moduledoc """
   """
 
+  alias ExGrib.Grib1.Data.SignedInteger
   alias ExGrib.Grib1.Table8
 
   defstruct i_direction_increment: :not_parsed,
@@ -45,22 +46,14 @@ defmodule ExGrib.Grib1.Grids.LatitudeLongitudeGrid do
     %__MODULE__{
       i_direction_increment: i_direction_increment,
       j_direction_increment: j_direction_increment,
-      latitude_of_first_grid_point: coord(latitude_of_first_grid_point),
-      latitude_of_last_grid_point: coord(latitude_of_last_grid_point),
-      longitude_of_first_grid_point: coord(longitude_of_first_grid_point),
-      longitude_of_last_grid_point: coord(longitude_of_last_grid_point),
+      latitude_of_first_grid_point: SignedInteger.parse(latitude_of_first_grid_point),
+      latitude_of_last_grid_point: SignedInteger.parse(latitude_of_last_grid_point),
+      longitude_of_first_grid_point: SignedInteger.parse(longitude_of_first_grid_point),
+      longitude_of_last_grid_point: SignedInteger.parse(longitude_of_last_grid_point),
       ni: ni,
       nj: nj,
       resolution_and_component_flags: resolution_and_component_flags,
       scanning_mode: Table8.get(scanning_mode)
     }
-  end
-
-  defp coord(<<0::size(1)-unit(1), value_in_milli_degrees::integer-size(23)-unit(1)>>) do
-    value_in_milli_degrees
-  end
-
-  defp coord(<<1::size(1)-unit(1), value_in_milli_degrees::integer-size(23)-unit(1)>>) do
-    -1 * value_in_milli_degrees
   end
 end
