@@ -41,11 +41,8 @@ defmodule ExGrib.Grib1 do
     |> parse_step(:section_2, &Section2.parse/1)
     |> parse_step(:section_3, &Section3.parse/1)
     |> parse_step(:section_4, &Section4.parse/1)
-    |> parse_step(:footer, &footer/1)
+    |> parse_step(:section_5, &Section5.parse/1)
   end
-
-  @spec footer(Section5.input()) :: Section5.t()
-  def footer(binary), do: Section5.parse(binary)
 
   defguardp is_ommited(section, section_1)
             when (section == :section_2 and section_1.section_1_flags.section_2 == :ommited) or
@@ -53,7 +50,7 @@ defmodule ExGrib.Grib1 do
 
   defp parse_step({:error, step}, _, _), do: {:error, step}
 
-  defp parse_step({binary, struct}, :footer, function) do
+  defp parse_step({binary, struct}, :section_5, function) do
     case function.(binary) do
       {:ok, :end_of_file} -> {:ok, struct}
       {:ok, :more_data, data} -> {:ok, struct, data}
