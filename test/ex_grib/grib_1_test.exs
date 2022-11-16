@@ -6,7 +6,6 @@ defmodule ExGrib.Grib1Test do
   alias ExGrib.Grib1.Section0
   alias ExGrib.Grib1.Section1
   alias ExGrib.Grib1.Section2
-  alias ExGrib.Grib1.Section3
   alias ExGrib.Grib1.Section4
   alias ExGrib.Grib1.Table1
   alias ExGrib.Grib1.Table2
@@ -25,18 +24,6 @@ defmodule ExGrib.Grib1Test do
 
     test "it returns false otherwise" do
       assert false == Grib1.detect(file_contents("gfs_25km.grb2"))
-    end
-  end
-
-  describe "bitmap/1" do
-    test "it returns bitmap" do
-      # This is junk because this grib doesn't contain a bitmap...
-      assert {:ok, %Section3{}, _} =
-               Grib1.bitmap(file_contents("forecast.grb", skip: [octets: 68]))
-    end
-
-    test "it errors on an unrecognised section" do
-      assert :error = Grib1.bitmap(<<"NOPE">>)
     end
   end
 
@@ -72,7 +59,7 @@ defmodule ExGrib.Grib1Test do
                section_0: %Section0{file_size: 7526},
                section_1: section_1,
                section_2: section_2,
-               bitmap: :not_present,
+               section_3: :not_present,
                data: section_4
              } = grib
 
