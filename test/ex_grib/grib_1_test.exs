@@ -28,16 +28,6 @@ defmodule ExGrib.Grib1Test do
     end
   end
 
-  describe "header/1" do
-    test "it returns the header of the grib" do
-      assert {:ok, %Section0{file_size: 7526}, _} = Grib1.header(file_contents("forecast.grb"))
-    end
-
-    test "it errors on unrecognised headers" do
-      assert :error = Grib1.header(<<"NOTAGRIB">>)
-    end
-  end
-
   describe "product_definition/1" do
     test "it returns the production_definition of the grib" do
       assert {:ok, section_1, _} =
@@ -76,7 +66,7 @@ defmodule ExGrib.Grib1Test do
     end
 
     test "it errors on unrecognised headers" do
-      assert :error = Grib1.header(<<"NOTAGRIB">>)
+      assert :error = Grib1.product_definition(<<"NOTAGRIB">>)
     end
   end
 
@@ -158,7 +148,7 @@ defmodule ExGrib.Grib1Test do
       assert {:ok, %Grib1{} = grib, _more_data} = Grib1.parse(file_contents("forecast.grb"))
 
       assert %Grib1{
-               header: %Section0{file_size: 7526},
+               section_0: %Section0{file_size: 7526},
                grid_definition: section_2,
                product_definition: section_1,
                bitmap: :not_present,
