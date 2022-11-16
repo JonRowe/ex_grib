@@ -18,7 +18,7 @@ defmodule ExGrib.Grib1.Section1 do
   https://apps.ecmwf.int/codes/grib/format/grib1/sections/1/
   """
 
-  alias ExGrib.Grib1.Data.SignedFactor
+  alias ExGrib.Grib1.Data.SignedInteger
   alias ExGrib.Grib1.Table0
   alias ExGrib.Grib1.Table1
   alias ExGrib.Grib1.Table2
@@ -173,7 +173,7 @@ defmodule ExGrib.Grib1.Section1 do
         number_missing_from_averages_or_accumulations,
       century_of_reference_time_of_data: century_of_reference_time_of_data,
       sub_centre: Table0.get(sub_centre),
-      decimal_scale_factor: SignedFactor.parse(decimal_scale_factor)
+      decimal_scale_factor: SignedInteger.parse(decimal_scale_factor)
     }
 
     {:ok, section, rest}

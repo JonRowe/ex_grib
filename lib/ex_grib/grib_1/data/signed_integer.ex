@@ -1,4 +1,4 @@
-defmodule ExGrib.Grib1.Data.SignedFactor do
+defmodule ExGrib.Grib1.Data.SignedInteger do
   @moduledoc """
   These values use 1 in the leading bit to indicate negative values but
   are otherwise straightforward integers.
