@@ -6,12 +6,12 @@ defmodule ExGrib.Grib1.Packing.SimpleGrid do
 
   alias ExGrib.Grib1.Grid
 
-  def read(%{data: data_definition, grid_definition: grid, product_definition: product}) do
+  def read(%{data: data_definition, grid_definition: grid, section_1: section_1}) do
     Enum.with_index(data_definition.data, fn raw_value, index ->
       %__MODULE__{
         latitude: Grid.latitude(grid.grid_definition, index),
         longitude: Grid.longitude(grid.grid_definition, index),
-        value: transform(raw_value, data_definition, product)
+        value: transform(raw_value, data_definition, section_1)
       }
     end)
   end

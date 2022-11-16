@@ -111,7 +111,7 @@ defmodule ExGrib.Grib1.Packing.SimpleGridTest do
     messages
     |> Enum.filter(fn
       %{
-        product_definition: %Section1{
+        section_1: %Section1{
           level: ^height,
           p1: 720,
           indicator_of_parameter: ^table_2,
@@ -133,7 +133,7 @@ defmodule ExGrib.Grib1.Packing.SimpleGridTest do
 
   defp find_message(messages, table_2) do
     Enum.filter(messages, fn
-      %{product_definition: %Section1{p1: 720, indicator_of_parameter: ^table_2}} -> true
+      %{section_1: %Section1{p1: 720, indicator_of_parameter: ^table_2}} -> true
       _ -> false
     end)
   end
@@ -141,7 +141,7 @@ defmodule ExGrib.Grib1.Packing.SimpleGridTest do
   defp find_message(messages, table_2, table_3) do
     Enum.filter(messages, fn
       %{
-        product_definition: %Section1{
+        section_1: %Section1{
           p1: 720,
           indicator_of_parameter: ^table_2,
           indicator_of_type_of_level: ^table_3
