@@ -3,6 +3,7 @@ defmodule ExGrib.Grib1.Grids.LatitudeLongitudeGrid do
   """
 
   alias ExGrib.Grib1.Data.SignedInteger
+  alias ExGrib.Grib1.Grid
   alias ExGrib.Grib1.Table8
 
   defstruct i_direction_increment: :not_parsed,
@@ -55,5 +56,41 @@ defmodule ExGrib.Grib1.Grids.LatitudeLongitudeGrid do
       resolution_and_component_flags: resolution_and_component_flags,
       scanning_mode: Table8.get(scanning_mode)
     }
+  end
+
+  # i is west to east
+  # j is south to north
+  #
+  # with consecutive points i each row and no reversed rows
+  # each point is thus consecutive longitude, with each "row"
+  # being a single latitude
+  #
+  # TODO: only works for even grids currently, no stretching
+
+  defimpl Grid do
+    def latitude(%{i_direction_increment: inc, latitude_of_first_grid_point: lat} = grid, index) do
+      n =
+        case grid.scanning_mode do
+          %Table8{consecutive_points: :i, i_direction: :positive, j_direction: :positive} ->
+            floor(index / grid.ni)
+        end
+
+      # row number n is given by index divided by the number
+      # in each row rounded down
+      lat + n * inc
+    end
+
+    def longitude(%{j_direction_increment: inc, longitude_of_first_grid_point: lon} = grid, index) do
+      n =
+        case grid.scanning_mode do
+          %Table8{consecutive_points: :i, i_direction: :positive, j_direction: :positive} ->
+            index - floor(index / grid.ni) * grid.ni
+        end
+
+      # position in row is given by the index
+      # minus the amount in previous rows, which
+      # in turn is row number multiplied by amount in each row
+      lon + n * inc
+    end
   end
 end

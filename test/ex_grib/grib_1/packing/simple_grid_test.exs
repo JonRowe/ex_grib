@@ -1,7 +1,6 @@
 defmodule ExGrib.Grib1.Packing.SimpleGridTest do
   use ExUnit.Case, async: true
 
-  alias ExGrib.Grib1
   alias ExGrib.Grib1.Section1
   alias ExGrib.Grib1.Table2
   alias ExGrib.Grib1.Table3
@@ -23,44 +22,6 @@ defmodule ExGrib.Grib1.Packing.SimpleGridTest do
   }
 
   describe "read/2" do
-    test "it correctly translates latitude / longitude" do
-      assert {:ok, message, _more} = Grib1.parse(file_contents("forecast.grb"))
-      assert grid = SimpleGrid.read(message)
-
-      # i points should be consecutive 0.1 apart, i is west to east so longitude
-      # points should be incrementing.
-      assert [
-               [
-                 %{latitude: 47210, longitude: -7346},
-                 %{latitude: 47210, longitude: -7246},
-                 %{latitude: 47210, longitude: -7146} | row_1_rest
-               ],
-               [
-                 %{latitude: 47310, longitude: -7346},
-                 %{latitude: 47310, longitude: -7246},
-                 %{latitude: 47310, longitude: -7146} | row_2_rest
-               ]
-               | rest
-             ] = Enum.chunk_every(grid, 61)
-
-      assert length(grid) == 61 * 61
-
-      assert Enum.all?(row_1_rest, &(&1.latitude == 47210))
-      assert %{longitude: -1346} = List.last(row_1_rest)
-
-      assert Enum.all?(row_2_rest, &(&1.latitude == 47310))
-      assert %{longitude: -1346} = List.last(row_2_rest)
-
-      assert [
-               %{latitude: 53210, longitude: -7346},
-               %{latitude: 53210, longitude: -7246},
-               %{latitude: 53210, longitude: -7146} | last_row_rest
-             ] = List.last(rest)
-
-      assert Enum.all?(last_row_rest, &(&1.latitude == 53210))
-      assert %{longitude: -1346} = List.last(last_row_rest)
-    end
-
     test "it reads data according to the grid definition and returns decoded values" do
       assert {:ok, messages} = ExGrib.parse_all(file_contents("forecast.grb"))
 
