@@ -13,7 +13,7 @@ defmodule ExGrib.Grib1Test do
   alias ExGrib.Grib1.Table8
   alias ExGrib.Grib1.Table11
 
-  import ExGrib.Test.File, only: [file_contents: 1, file_contents: 2]
+  import ExGrib.Test.File, only: [file_contents: 1]
 
   doctest ExGrib.Grib1
 
@@ -27,30 +27,6 @@ defmodule ExGrib.Grib1Test do
     end
   end
 
-  describe "data/1" do
-    test "it returns data" do
-      assert {:ok, %Section4{} = section, _} =
-               Grib1.data(file_contents("forecast.grb", skip: [octets: 68]))
-
-      assert %Section4{
-               binary_scale_factor: -6,
-               bits_per_value: 16,
-               data_flag: %Table11{
-                 additional_flags_at_section_4_octect_14: false,
-                 grid_or_sphere: :grid,
-                 int_or_float: :float,
-                 simple_or_complex: :simple
-               },
-               reference_value: 101_737.125,
-               section_length: 7454
-             } = section
-    end
-
-    test "it errors on an unrecognised section" do
-      assert :error = Grib1.data(<<"NOTAGRIB">>)
-    end
-  end
-
   describe "parse/1" do
     test "it pulls out a grib" do
       assert {:ok, %Grib1{} = grib, _more_data} = Grib1.parse(file_contents("forecast.grb"))
@@ -60,7 +36,7 @@ defmodule ExGrib.Grib1Test do
                section_1: section_1,
                section_2: section_2,
                section_3: :not_present,
-               data: section_4
+               section_4: section_4
              } = grib
 
       assert %Section1{

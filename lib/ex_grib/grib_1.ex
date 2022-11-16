@@ -14,7 +14,7 @@ defmodule ExGrib.Grib1 do
             section_1: :not_parsed,
             section_2: :not_parsed,
             section_3: :not_parsed,
-            data: :not_parsed
+            section_4: :not_parsed
 
   @type t ::
           %__MODULE__{
@@ -22,7 +22,7 @@ defmodule ExGrib.Grib1 do
             section_1: Section1.t() | :not_parsed,
             section_2: Section2.t() | :not_parsed,
             section_3: Section3.t() | :not_parsed,
-            data: Section4.t() | :not_parsed
+            section_4: Section4.t() | :not_parsed
           }
 
   @spec detect(binary()) :: boolean()
@@ -40,12 +40,9 @@ defmodule ExGrib.Grib1 do
     |> parse_step(:section_1, &Section1.parse/1)
     |> parse_step(:section_2, &Section2.parse/1)
     |> parse_step(:section_3, &Section3.parse/1)
-    |> parse_step(:data, &data/1)
+    |> parse_step(:section_4, &Section4.parse/1)
     |> parse_step(:footer, &footer/1)
   end
-
-  @spec data(Section4.input()) :: Section4.t()
-  def data(binary), do: Section4.parse(binary)
 
   @spec footer(Section5.input()) :: Section5.t()
   def footer(binary), do: Section5.parse(binary)
