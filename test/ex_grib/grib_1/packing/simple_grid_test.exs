@@ -23,7 +23,7 @@ defmodule ExGrib.Grib1.Packing.SimpleGridTest do
 
   describe "read/2" do
     test "it reads data according to the grid definition and returns decoded values" do
-      assert {:ok, messages} = ExGrib.parse_all(file_contents("forecast.grb"))
+      assert {:ok, messages} = ExGrib.parse_all(file_contents("forecast.grb"), read_data: true)
 
       # Values here were looked up with eccodes
       #
@@ -84,7 +84,7 @@ defmodule ExGrib.Grib1.Packing.SimpleGridTest do
     end
 
     test "it assigns values correctly to latitude / longitude" do
-      assert {:ok, messages} = ExGrib.parse_all(file_contents("forecast.grb"))
+      assert {:ok, messages} = ExGrib.parse_all(file_contents("forecast.grb"), read_data: true)
 
       assert [message] =
                find_message(

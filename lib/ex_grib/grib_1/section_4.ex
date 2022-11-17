@@ -13,6 +13,7 @@ defmodule ExGrib.Grib1.Section4 do
              reference_value: float(),
              section_length: integer()
            }
+  @type options :: [] | [read_data: boolean()]
   @type t :: {:ok, section()} | :error
 
   alias ExGrib.Grib1.Data.Float
@@ -26,21 +27,26 @@ defmodule ExGrib.Grib1.Section4 do
             reference_value: :not_parsed,
             section_length: :not_parsed
 
-  @spec parse(input()) :: t()
-  def parse(<<
-        # Length of section
-        section_length::integer-size(24),
-        # Flag (see Code table 11) (first 4 bits).
-        data_flag::binary-size(4)-unit(1),
-        # at end of section
-        number_of_unused_bits::integer-size(4),
-        raw_binary_scale_factor::binary-size(2),
-        # real (minimum of packed values)
-        reference_value::binary-size(4)-unit(8),
-        # Number of bits containing each packed value
-        bits_per_value::integer(),
-        more::binary()
-      >>) do
+  @spec parse(input(), options()) :: t()
+  def parse(data, opts \\ [])
+
+  def parse(
+        <<
+          # Length of section
+          section_length::integer-size(24),
+          # Flag (see Code table 11) (first 4 bits).
+          data_flag::binary-size(4)-unit(1),
+          # at end of section
+          number_of_unused_bits::integer-size(4),
+          raw_binary_scale_factor::binary-size(2),
+          # real (minimum of packed values)
+          reference_value::binary-size(4)-unit(8),
+          # Number of bits containing each packed value
+          bits_per_value::integer(),
+          more::binary()
+        >>,
+        opts
+      ) do
     data_size_in_bits = (section_length - 11) * 8 - number_of_unused_bits
 
     <<data::binary-size(data_size_in_bits)-unit(1),
@@ -51,7 +57,7 @@ defmodule ExGrib.Grib1.Section4 do
     section = %__MODULE__{
       binary_scale_factor: SignedInteger.parse(raw_binary_scale_factor),
       bits_per_value: bits_per_value,
-      data: parse_data(data, bits_per_value, table_11),
+      data: parse_data(data, bits_per_value, table_11, Keyword.get(opts, :read_data, true)),
       data_flag: table_11,
       reference_value: Float.parse(reference_value),
       section_length: section_length
@@ -60,7 +66,7 @@ defmodule ExGrib.Grib1.Section4 do
     {:ok, section, rest}
   end
 
-  def parse(_), do: :error
+  def parse(_, _), do: :error
 
   defp parse_chunk(data, n) when byte_size(data) * 8 >= n do
     <<chunk::binary-size(n)-unit(1), rest::binary()-unit(1)>> = data
@@ -69,7 +75,9 @@ defmodule ExGrib.Grib1.Section4 do
 
   defp parse_chunk(_, _), do: []
 
-  defp parse_data(data, n, %Table11{additional_flags_at_section_4_octect_14: false} = flags) do
+  defp parse_data(_data, _n, _flags, false), do: :not_loaded
+
+  defp parse_data(data, n, %Table11{additional_flags_at_section_4_octect_14: false} = flags, true) do
     case flags do
       %Table11{grid_or_sphere: :grid, simple_or_complex: :simple} ->
         # From octet 12 onwards, e.g. straight up data.

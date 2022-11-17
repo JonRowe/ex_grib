@@ -16,6 +16,8 @@ defmodule ExGrib.Grib1 do
             section_3: :not_parsed,
             section_4: :not_parsed
 
+  @type options :: [] | Section4.options()
+
   @type t ::
           %__MODULE__{
             section_0: Section0.t() | :not_parsed,
@@ -33,14 +35,14 @@ defmodule ExGrib.Grib1 do
     end
   end
 
-  @spec parse(binary()) :: {:ok, t(), binary()} | :error
-  def parse(binary) do
+  @spec parse(binary(), options()) :: {:ok, t(), binary()} | :error
+  def parse(binary, opts \\ []) do
     {binary, %__MODULE__{}}
     |> parse_step(:section_0, &Section0.parse/1)
     |> parse_step(:section_1, &Section1.parse/1)
     |> parse_step(:section_2, &Section2.parse/1)
     |> parse_step(:section_3, &Section3.parse/1)
-    |> parse_step(:section_4, &Section4.parse/1)
+    |> parse_step(:section_4, &Section4.parse(&1, opts))
     |> parse_step(:section_5, &Section5.parse/1)
   end
 

@@ -29,7 +29,8 @@ defmodule ExGrib.Grib1Test do
 
   describe "parse/1" do
     test "it pulls out a grib" do
-      assert {:ok, %Grib1{} = grib, _more_data} = Grib1.parse(file_contents("forecast.grb"))
+      assert {:ok, %Grib1{} = grib, _more_data} =
+               Grib1.parse(file_contents("forecast.grb"), read_data: false)
 
       assert %Grib1{
                section_0: %Section0{file_size: 7526},
@@ -99,6 +100,7 @@ defmodule ExGrib.Grib1Test do
       assert %Section4{
                binary_scale_factor: -6,
                bits_per_value: 16,
+               data: :not_loaded,
                data_flag: %Table11{
                  additional_flags_at_section_4_octect_14: false,
                  grid_or_sphere: :grid,
