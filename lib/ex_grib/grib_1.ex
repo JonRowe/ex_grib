@@ -37,22 +37,27 @@ defmodule ExGrib.Grib1 do
 
   @spec parse(binary(), options()) :: {:ok, t(), binary()} | :error
   def parse(binary, opts \\ []) do
-    {binary, %__MODULE__{}}
+    {binary, %__MODULE__{}, opts}
     |> parse_step(:section_0, &Section0.parse/1)
     |> parse_step(:section_1, &Section1.parse/1)
     |> parse_step(:section_2, &Section2.parse/1)
     |> parse_step(:section_3, &Section3.parse/1)
-    |> parse_step(:section_4, &Section4.parse(&1, opts))
+    |> parse_step(:section_4, &Section4.parse/3)
     |> parse_step(:section_5, &Section5.parse/1)
   end
+
+  defp call(function, :section_4, {binary, struct, opts}),
+    do: function.(binary, struct.section_1, opts)
+
+  defp call(function, _, {binary, _, _}), do: function.(binary)
 
   defguardp is_ommited(section, section_1)
             when (section == :section_2 and section_1.section_1_flags.section_2 == :ommited) or
                    (section == :section_3 and section_1.section_1_flags.section_3 == :ommited)
 
-  defp parse_step({:error, step}, _, _), do: {:error, step}
+  defp parse_step({:error, step, _}, _, _), do: {:error, step}
 
-  defp parse_step({binary, struct}, :section_5, function) do
+  defp parse_step({binary, struct, _}, :section_5, function) do
     case function.(binary) do
       {:ok, :end_of_file} -> {:ok, struct}
       {:ok, :more_data, data} -> {:ok, struct, data}
@@ -60,13 +65,20 @@ defmodule ExGrib.Grib1 do
     end
   end
 
-  defp parse_step({binary, %{section_1: s1} = struct}, key, _) when is_ommited(key, s1) do
-    {binary, Map.put(struct, key, :not_present)}
+  defp parse_step({binary, %{section_1: s1} = struct, opts}, key, _) when is_ommited(key, s1) do
+    {binary, Map.put(struct, key, :not_present), opts}
   end
 
-  defp parse_step({binary, struct}, step, function) do
-    case function.(binary) do
-      {:ok, section, next} -> {next, Map.put(struct, step, section)}
+  defp parse_step({binary, struct, opts}, step, function) when step == :section_4 do
+    case function.(binary, struct.section_1, opts) do
+      {:ok, section, next} -> {next, Map.put(struct, step, section), opts}
+      :error -> {:error, step}
+    end
+  end
+
+  defp parse_step({_, struct, opts} = tuple, step, function) do
+    case call(function, step, tuple) do
+      {:ok, section, next} -> {next, Map.put(struct, step, section), opts}
       :error -> {:error, step}
     end
   end

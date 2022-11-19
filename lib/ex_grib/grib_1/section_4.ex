@@ -18,6 +18,8 @@ defmodule ExGrib.Grib1.Section4 do
 
   alias ExGrib.Grib1.Data.Float
   alias ExGrib.Grib1.Data.SignedInteger
+  alias ExGrib.Grib1.Packing
+  alias ExGrib.Grib1.Section1
   alias ExGrib.Grib1.Table11
 
   defstruct binary_scale_factor: :not_parsed,
@@ -27,8 +29,8 @@ defmodule ExGrib.Grib1.Section4 do
             reference_value: :not_parsed,
             section_length: :not_parsed
 
-  @spec parse(input(), options()) :: t()
-  def parse(data, opts \\ [])
+  @spec parse(Section1.t(), input(), options()) :: t()
+  def parse(section_1, data, opts \\ [])
 
   def parse(
         <<
@@ -45,6 +47,7 @@ defmodule ExGrib.Grib1.Section4 do
           bits_per_value::integer(),
           more::binary()
         >>,
+        %Section1{decimal_scale_factor: d},
         opts
       ) do
     data_size_in_bits = (section_length - 11) * 8 - number_of_unused_bits
@@ -54,34 +57,31 @@ defmodule ExGrib.Grib1.Section4 do
 
     table_11 = Table11.get(data_flag)
 
-    section = %__MODULE__{
-      binary_scale_factor: SignedInteger.parse(raw_binary_scale_factor),
-      bits_per_value: bits_per_value,
-      data: parse_data(data, bits_per_value, table_11, Keyword.get(opts, :read_data, true)),
-      data_flag: table_11,
-      reference_value: Float.parse(reference_value),
-      section_length: section_length
-    }
+    section =
+      %__MODULE__{
+        binary_scale_factor: SignedInteger.parse(raw_binary_scale_factor),
+        bits_per_value: bits_per_value,
+        data: :not_loaded,
+        data_flag: table_11,
+        reference_value: Float.parse(reference_value),
+        section_length: section_length
+      }
+      |> maybe_load_data(data, d, Keyword.get(opts, :read_data, true))
 
     {:ok, section, rest}
   end
 
-  def parse(_, _), do: :error
+  def parse(_, _, _), do: :error
 
-  defp parse_chunk(data, n) when byte_size(data) * 8 >= n do
-    <<chunk::binary-size(n)-unit(1), rest::binary()-unit(1)>> = data
-    [chunk | parse_chunk(rest, n)]
-  end
+  defp maybe_load_data(section, _data, _d, false), do: section
 
-  defp parse_chunk(_, _), do: []
+  defp maybe_load_data(section, data, d, true) do
+    parsed_data =
+      case section.data_flag do
+        %Table11{grid_or_sphere: :grid, simple_or_complex: :simple} ->
+          Packing.SimpleGrid.parse(section, data, d)
+      end
 
-  defp parse_data(_data, _n, _flags, false), do: :not_loaded
-
-  defp parse_data(data, n, %Table11{additional_flags_at_section_4_octect_14: false} = flags, true) do
-    case flags do
-      %Table11{grid_or_sphere: :grid, simple_or_complex: :simple} ->
-        # From octet 12 onwards, e.g. straight up data.
-        parse_chunk(data, n)
-    end
+    %__MODULE__{section | data: parsed_data}
   end
 end

@@ -4,16 +4,18 @@ defmodule ExGrib.Grib1.Section4Test do
   doctest ExGrib.Grib1.Section4
 
   alias ExGrib.Grib1.Table11
+  alias ExGrib.Grib1.Section1
   alias ExGrib.Grib1.Section4
 
   import ExGrib.Test.File, only: [file_contents: 2]
 
   @fixed_bytes 12
+  @section_1 %Section1{decimal_scale_factor: 0}
 
   describe "parse/2" do
     test "it defaults to reading the data" do
       assert {:ok, %Section4{} = section, _} =
-               Section4.parse(file_contents("forecast.grb", skip: [octets: 68]))
+               Section4.parse(file_contents("forecast.grb", skip: [octets: 68]), @section_1)
 
       assert length(section.data) ==
                (section.section_length - @fixed_bytes) * 8 / section.bits_per_value
@@ -21,7 +23,9 @@ defmodule ExGrib.Grib1.Section4Test do
 
     test "it returns the definition without the data when asked" do
       assert {:ok, %Section4{} = section, _} =
-               Section4.parse(file_contents("forecast.grb", skip: [octets: 68]), read_data: false)
+               Section4.parse(file_contents("forecast.grb", skip: [octets: 68]), @section_1,
+                 read_data: false
+               )
 
       assert %Section4{
                binary_scale_factor: -6,
@@ -40,7 +44,9 @@ defmodule ExGrib.Grib1.Section4Test do
 
     test "it returns the definition with the data when asked" do
       assert {:ok, %Section4{} = section, _} =
-               Section4.parse(file_contents("forecast.grb", skip: [octets: 68]), read_data: true)
+               Section4.parse(file_contents("forecast.grb", skip: [octets: 68]), @section_1,
+                 read_data: true
+               )
 
       assert %Section4{
                binary_scale_factor: -6,
@@ -60,7 +66,7 @@ defmodule ExGrib.Grib1.Section4Test do
     end
 
     test "it errors on an unrecognised section" do
-      assert :error = Section4.parse(<<"NOTAGRIB">>)
+      assert :error = Section4.parse(<<"NOTAGRIB">>, @section_1)
     end
   end
 end
