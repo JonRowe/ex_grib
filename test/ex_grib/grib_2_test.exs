@@ -4,7 +4,6 @@ defmodule ExGrib.Grib2Test do
   alias ExGrib.Grib2
   alias ExGrib.Grib2.Section0
   alias ExGrib.Grib2.Section1
-  alias ExGrib.Grib2.Section2
   alias ExGrib.Grib2.Section3
   alias ExGrib.Grib2.Section4
   alias ExGrib.Grib2.Section5
@@ -25,22 +24,6 @@ defmodule ExGrib.Grib2Test do
 
     test "it returns false otherwise" do
       assert false == Grib2.detect(<<"GRIB", 0, 0, 0, 1>>)
-    end
-  end
-
-  describe "local_use/1" do
-    test "it captures the local use section" do
-      assert {:ok, %Section2{local: "LOCAL"}, "NEXT"} =
-               Grib2.local_use(<<0, 0, 0, 10, 2, "LOCAL", "NEXT">>)
-    end
-
-    test "it works with our sample file" do
-      file = file_contents("gfs_25km.grb2", skip: [octets: 37])
-      {:ok, :not_present, ^file} = Grib2.local_use(file)
-    end
-
-    test "it errors on an unrecognised section" do
-      assert :error = Grib2.local_use(<<"NOTAGRIB">>)
     end
   end
 
@@ -193,7 +176,7 @@ defmodule ExGrib.Grib2Test do
       assert %Grib2{
                section_0: %Section0{discipline: :meteorological, file_size: 188},
                section_1: %Section1{} = section_1,
-               local_use: :not_present,
+               section_2: :not_present,
                grid_definition: section_3,
                product_definition: section_4,
                data_representation: section_5,
