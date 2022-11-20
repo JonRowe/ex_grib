@@ -73,6 +73,36 @@ defmodule ExGrib.Grib1Test do
     end
   end
 
+  describe "matches?/2" do
+    @height :specified_height_level_above_ground
+
+    test "it returns true when all query parts match the grib" do
+      assert {:ok, message, _} =
+               Grib1.parse(file_contents("forecast.grb", skip: [octets: 180_272]),
+                 read_data: false
+               )
+
+      assert Grib1.matches?(message, parameter: :temperature)
+      assert Grib1.matches?(message, parameter: :temperature, unit: :k)
+      assert Grib1.matches?(message, parameter: :temperature, level: 2)
+      assert Grib1.matches?(message, parameter: :temperature, type_of_level: @height)
+      assert Grib1.matches?(message, parameter: :temperature, unit: :k, level: 2)
+      assert Grib1.matches?(message, parameter: :temperature, type_of_level: @height, unit: :k)
+      assert Grib1.matches?(message, parameter: :temperature, type_of_level: @height, level: 2)
+
+      assert Grib1.matches?(message,
+               parameter: :temperature,
+               type_of_level: @height,
+               level: 2,
+               unit: :k
+             )
+
+      refute Grib1.matches?(message, parameter: :u_component_of_wind)
+      refute Grib1.matches?(message, parameter: :temperature, unit: :hpa)
+      refute Grib1.matches?(message, parameter: :temperature, level: 10)
+    end
+  end
+
   describe "parse/1" do
     test "it pulls out a grib" do
       assert {:ok, %Grib1{} = grib, _more_data} =

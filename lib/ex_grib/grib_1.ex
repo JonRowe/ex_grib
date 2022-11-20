@@ -52,6 +52,20 @@ defmodule ExGrib.Grib1 do
     Grid.index(section_2.grid_definition, latitude, longitude)
   end
 
+  @spec matches?(t(), list(keyword())) :: boolean()
+  def matches?(%__MODULE__{}, []), do: true
+
+  def matches?(%__MODULE__{} = grib, query) do
+    Enum.all?(query, fn {key, value} ->
+      case key do
+        :level -> grib.section_1.level == value
+        :parameter -> grib.section_1.indicator_of_parameter.parameter == value
+        :type_of_level -> grib.section_1.indicator_of_type_of_level.octet_10 == value
+        :unit -> grib.section_1.indicator_of_parameter.unit == value
+      end
+    end)
+  end
+
   @spec parse(binary(), options()) :: {:ok, t(), binary()} | :error
   def parse(binary, opts \\ []) do
     {binary, %__MODULE__{}, opts}
