@@ -79,7 +79,7 @@ defmodule ExGrib.Grib1.Section4 do
     parsed_data =
       case section.data_flag do
         %Table11{grid_or_sphere: :grid, simple_or_complex: :simple} ->
-          Packing.SimpleGrid.parse(section, data, d)
+          Packing.Simple.parse(section, data, d)
       end
 
     %__MODULE__{section | data: parsed_data}

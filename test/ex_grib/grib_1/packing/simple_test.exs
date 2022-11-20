@@ -1,4 +1,4 @@
-defmodule ExGrib.Grib1.Packing.SimpleGridTest do
+defmodule ExGrib.Grib1.Packing.SimpleTest do
   use ExUnit.Case, async: true
 
   alias ExGrib.Grib1.Section1
@@ -9,7 +9,7 @@ defmodule ExGrib.Grib1.Packing.SimpleGridTest do
 
   import ExGrib.Test.File, only: [file_contents: 1, file_contents: 2]
 
-  alias ExGrib.Grib1.Packing.SimpleGrid
+  alias ExGrib.Grib1.Packing.Simple
 
   @height_above_ground %Table3{
     octet_10: :specified_height_level_above_ground,
@@ -99,7 +99,7 @@ defmodule ExGrib.Grib1.Packing.SimpleGridTest do
         file_contents("forecast_temperatures.csv", parse: :csv)
 
       parsed_data =
-        Enum.map(SimpleGrid.read(message), &[&1.latitude / 1000, &1.longitude / 1000, &1.value])
+        Enum.map(Simple.read(message), &[&1.latitude / 1000, &1.longitude / 1000, &1.value])
 
       assert Enum.sort(parsed_data) == Enum.sort(expected_data)
     end
@@ -121,40 +121,40 @@ defmodule ExGrib.Grib1.Packing.SimpleGridTest do
     @section_4_int %Section4{@section_4 | data_flag: @table_11_int}
 
     test "it can suppress transforming values" do
-      assert SimpleGrid.parse(@section_4, <<440::size(10)>>, 0, transform: false) == [
+      assert Simple.parse(@section_4, <<440::size(10)>>, 0, transform: false) == [
                <<440::size(10)>>
              ]
     end
 
     test "it transforms float values according to the reference value" do
-      assert SimpleGrid.parse(@section_4, <<440::size(10)>>, 0) == [286.739990234375]
-      assert SimpleGrid.parse(@section_4, <<440::size(10)>>, 1) == [28.6739990234375]
+      assert Simple.parse(@section_4, <<440::size(10)>>, 0) == [286.739990234375]
+      assert Simple.parse(@section_4, <<440::size(10)>>, 1) == [28.6739990234375]
 
-      assert SimpleGrid.parse(@section_4, <<440::size(10), 448::size(10)>>, 0) == [
+      assert Simple.parse(@section_4, <<440::size(10), 448::size(10)>>, 0) == [
                286.739990234375,
                286.864990234375
              ]
     end
 
     test "it transforms int values according to the rounded reference value" do
-      assert SimpleGrid.parse(@section_4_int, <<448::size(10)>>, 0) == [287]
+      assert Simple.parse(@section_4_int, <<448::size(10)>>, 0) == [287]
 
       # Note only the reference value is rounded so a float value would still produce a float
-      assert SimpleGrid.parse(@section_4_int, <<440::size(10)>>, 0) == [286.875]
+      assert Simple.parse(@section_4_int, <<440::size(10)>>, 0) == [286.875]
     end
 
     test "it translates 16bit infinity" do
-      assert SimpleGrid.parse(@section_4_16bit, <<0b1111110101010101::size(16)>>, 0) == [
+      assert Simple.parse(@section_4_16bit, <<0b1111110101010101::size(16)>>, 0) == [
                :infinity
              ]
     end
 
     test "it translates 16bit nan" do
-      assert SimpleGrid.parse(@section_4_16bit, <<0b0111110101010101::size(16)>>, 0) == [:nan]
+      assert Simple.parse(@section_4_16bit, <<0b0111110101010101::size(16)>>, 0) == [:nan]
     end
 
     test "it handles left over bits" do
-      assert SimpleGrid.parse(%Section4{bits_per_value: 10}, <<0b0000>>, 0) == []
+      assert Simple.parse(%Section4{bits_per_value: 10}, <<0b0000>>, 0) == []
     end
   end
 
@@ -215,7 +215,7 @@ defmodule ExGrib.Grib1.Packing.SimpleGridTest do
       [one] -> one
       [] -> raise "Missing entry"
     end
-    |> SimpleGrid.read()
+    |> Simple.read()
     |> Enum.find_value(fn
       %{latitude: 49910, longitude: -5946, value: value} -> value
       %{latitude: _lat, longitude: _lon} -> false

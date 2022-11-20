@@ -1,4 +1,4 @@
-defmodule ExGrib.Grib1.Packing.SimpleGrid do
+defmodule ExGrib.Grib1.Packing.Simple do
   @moduledoc """
   """
 
