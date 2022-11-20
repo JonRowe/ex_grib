@@ -2,7 +2,6 @@ defmodule ExGribTest do
   use ExUnit.Case
 
   alias ExGrib.Grib1
-  alias ExGrib.Grib1.Section1
   alias ExGrib.Grib2
 
   doctest ExGrib
@@ -98,14 +97,7 @@ defmodule ExGribTest do
   end
 
   defp read(messages, query) do
-    messages
-    |> ExGrib.find(query)
-    |> Enum.filter(fn
-      %{section_1: %Section1{p1: 720}} -> true
-      _ -> false
-    end)
-    |> case do
-      [message] -> Enum.at(message.section_4.data, Grib1.index(message, 49910, -5946))
-    end
+    [message] = ExGrib.find(messages, Keyword.put(query, :time, ~N[2022-05-29 12:00:00]))
+    Enum.at(message.section_4.data, Grib1.index(message, 49910, -5946))
   end
 end

@@ -103,6 +103,20 @@ defmodule ExGrib.Grib1Test do
     end
   end
 
+  describe "matches_forecast_time?/2" do
+    test "it returns true when the naivedatetime matches the forecast time" do
+      assert {:ok, message, _} =
+               Grib1.parse(file_contents("forecast.grb", skip: [octets: 180_272]),
+                 read_data: false
+               )
+
+      assert Grib1.matches_forecast_time?(message, ~N[2022-05-29 12:00:00])
+      refute Grib1.matches_forecast_time?(message, ~N[2022-05-29 11:00:00])
+      refute Grib1.matches_forecast_time?(message, ~N[2022-05-29 13:00:00])
+      refute Grib1.matches_forecast_time?(message, ~N[2022-05-30 12:00:00])
+    end
+  end
+
   describe "parse/1" do
     test "it pulls out a grib" do
       assert {:ok, %Grib1{} = grib, _more_data} =

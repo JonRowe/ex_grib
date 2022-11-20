@@ -60,10 +60,28 @@ defmodule ExGrib.Grib1 do
       case key do
         :level -> grib.section_1.level == value
         :parameter -> grib.section_1.indicator_of_parameter.parameter == value
+        :time -> matches_forecast_time?(grib, value)
         :type_of_level -> grib.section_1.indicator_of_type_of_level.octet_10 == value
         :unit -> grib.section_1.indicator_of_parameter.unit == value
       end
     end)
+  end
+
+  @spec matches?(t(), NaiveDateTime.t()) :: boolean()
+  def matches_forecast_time?(%__MODULE__{section_1: s1} = _grib, %NaiveDateTime{} = time) do
+    year = (s1.century_of_reference_time_of_data - 1) * 100 + s1.year_of_century
+    {:ok, reference_date} = Date.new(year, s1.month, s1.day)
+    {:ok, reference_time} = Time.new(s1.hour, s1.minute, 0)
+    {:ok, reference_datetime} = NaiveDateTime.new(reference_date, reference_time)
+
+    case s1 do
+      %{time_range_indicator: time_range, unit_of_time_range: :minute}
+      when time_range in [
+             :p1_occupies_octets_19_20,
+             :forecast_or_uninitialized_analysis_or_image_valid_for_reference_time
+           ] ->
+        NaiveDateTime.add(reference_datetime, s1.p1 * 60) == time
+    end
   end
 
   @spec parse(binary(), options()) :: {:ok, t(), binary()} | :error
