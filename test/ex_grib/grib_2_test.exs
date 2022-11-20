@@ -13,7 +13,7 @@ defmodule ExGrib.Grib2Test do
   alias ExGrib.Grib2.Section4.Templates.AnalysisOrForecast
   alias ExGrib.Grib2.Section5.Templates.GridPointDataSimplePacking
 
-  import ExGrib.Test.File, only: [file_contents: 1, file_contents: 2]
+  import ExGrib.Test.File, only: [file_contents: 1]
 
   doctest ExGrib.Grib2
 
@@ -24,21 +24,6 @@ defmodule ExGrib.Grib2Test do
 
     test "it returns false otherwise" do
       assert false == Grib2.detect(<<"GRIB", 0, 0, 0, 1>>)
-    end
-  end
-
-  describe "footer/1" do
-    test "it returns :ok if a valid end of file" do
-      assert {:ok, :end_of_file} = Grib2.footer("7777")
-    end
-
-    test "it returns {:ok, :more_data, data} if a valid end of grib but not end of file" do
-      assert {:ok, :more_data, _} =
-               Grib2.footer(file_contents("gfs_25km.grb2", skip: [octets: 184]))
-    end
-
-    test "it errors on an unrecognised section" do
-      assert :error = Grib2.footer(<<"NOTAGRIB">>)
     end
   end
 

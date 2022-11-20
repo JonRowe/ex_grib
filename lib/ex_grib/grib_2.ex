@@ -58,13 +58,10 @@ defmodule ExGrib.Grib2 do
     |> parse_step(:section_5, &Section5.parse/1)
     |> parse_step(:section_6, &Section6.parse/1)
     |> parse_step(:section_7, &Section7.parse/1)
-    |> parse_step(:footer, &footer/1)
+    |> parse_step(:section_8, &Section8.parse/1)
   end
 
-  @spec footer(Section8.input()) :: Section8.t()
-  def footer(binary), do: Section8.parse(binary)
-
-  defp parse_step({binary, struct}, :footer, function) do
+  defp parse_step({binary, struct}, :section_8, function) do
     case function.(binary) do
       {:ok, :end_of_file} -> {:ok, struct}
       {:ok, :more_data, data} -> {:ok, struct, data}
