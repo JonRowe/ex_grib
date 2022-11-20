@@ -97,7 +97,8 @@ defmodule ExGribTest do
   end
 
   defp read(messages, query) do
-    [message] = ExGrib.find(messages, Keyword.put(query, :time, ~N[2022-05-29 12:00:00]))
-    Enum.at(message.section_4.data, Grib1.index(message, 49910, -5946))
+    case ExGrib.find(messages, Keyword.put(query, :time, ~N[2022-05-29 12:00:00])) do
+      [%Grib1{} = message] -> Enum.at(message.section_4.data, Grib1.index(message, 49910, -5946))
+    end
   end
 end
