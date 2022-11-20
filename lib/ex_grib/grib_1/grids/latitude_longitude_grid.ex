@@ -68,6 +68,19 @@ defmodule ExGrib.Grib1.Grids.LatitudeLongitudeGrid do
   # TODO: only works for even grids currently, no stretching
 
   defimpl Grid do
+    def index(grid, latitude, longitude) do
+      case grid.scanning_mode do
+        %Table8{consecutive_points: :i, i_direction: :positive, j_direction: :positive} ->
+          lat_n =
+            floor((latitude - grid.latitude_of_first_grid_point) / grid.i_direction_increment)
+
+          lon_n =
+            floor((longitude - grid.longitude_of_first_grid_point) / grid.j_direction_increment)
+
+          lat_n * grid.ni + lon_n
+      end
+    end
+
     def latitude(%{i_direction_increment: inc, latitude_of_first_grid_point: lat} = grid, index) do
       n =
         case grid.scanning_mode do

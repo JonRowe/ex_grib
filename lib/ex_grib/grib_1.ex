@@ -47,6 +47,11 @@ defmodule ExGrib.Grib1 do
     end)
   end
 
+  @spec index(t(), integer(), integer()) :: integer() | :not_found
+  def index(%__MODULE__{section_2: section_2}, latitude, longitude) do
+    Grid.index(section_2.grid_definition, latitude, longitude)
+  end
+
   @spec parse(binary(), options()) :: {:ok, t(), binary()} | :error
   def parse(binary, opts \\ []) do
     {binary, %__MODULE__{}, opts}

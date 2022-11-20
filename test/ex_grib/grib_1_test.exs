@@ -60,6 +60,19 @@ defmodule ExGrib.Grib1Test do
     end
   end
 
+  describe "index/2" do
+    test "it returns the index for a latitude / longitude pair" do
+      assert {:ok, message, _} = Grib1.parse(file_contents("forecast.grb"), read_data: true)
+      assert Grib1.index(message, 49910, -5946) == 1661
+    end
+
+    test "it will return nearest? index for a slightly miss matched latitude / longitude pair" do
+      assert {:ok, message, _} = Grib1.parse(file_contents("forecast.grb"), read_data: true)
+      assert Grib1.index(message, 49950, -5950) == 1660
+      assert Grib1.index(message, 49950, -5940) == 1661
+    end
+  end
+
   describe "parse/1" do
     test "it pulls out a grib" do
       assert {:ok, %Grib1{} = grib, _more_data} =
