@@ -27,30 +27,6 @@ defmodule ExGrib.Grib2Test do
     end
   end
 
-  describe "data_representation/1" do
-    test "it returns data representation data" do
-      assert {:ok, section, _} =
-               Grib2.data_representation(file_contents("gfs_25km.grb2", skip: [octets: 143]))
-
-      assert %Section5{
-               number_of_data_points_with_values_in_section_7: 9,
-               template: %GridPointDataSimplePacking{} = template
-             } = section
-
-      assert %GridPointDataSimplePacking{
-               binary_scale_factor: 32773,
-               decimal_scale_factor: 0,
-               number_of_packing_bits: 8,
-               reference_value: 1_078_565_273,
-               type_of_original_field_values: 0
-             } == template
-    end
-
-    test "it errors on an unrecognised section" do
-      assert :error = Grib2.data_representation(<<"NOTAGRIB">>)
-    end
-  end
-
   describe "bitmap/1" do
     test "it returns bitmap data" do
       assert {:ok, %Section6{bit_map_data: "bitmap", bit_map_indicator: :bit_map_attached},
@@ -103,7 +79,7 @@ defmodule ExGrib.Grib2Test do
                section_2: :not_present,
                section_3: section_3,
                section_4: section_4,
-               data_representation: section_5,
+               section_5: section_5,
                bitmap: %Section6{bit_map_data: :none, bit_map_indicator: :bit_map_does_not_apply},
                data: %Section7{}
              } = grib
