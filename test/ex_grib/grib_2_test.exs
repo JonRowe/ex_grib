@@ -27,17 +27,6 @@ defmodule ExGrib.Grib2Test do
     end
   end
 
-  describe "data/1" do
-    test "it returns data" do
-      assert {:ok, %Section7{}, _} =
-               Grib2.data(file_contents("gfs_25km.grb2", skip: [octets: 170]))
-    end
-
-    test "it errors on an unrecognised section" do
-      assert :error = Grib2.data(<<"NOTAGRIB">>)
-    end
-  end
-
   describe "footer/1" do
     test "it returns :ok if a valid end of file" do
       assert {:ok, :end_of_file} = Grib2.footer("7777")
@@ -68,7 +57,7 @@ defmodule ExGrib.Grib2Test do
                  bit_map_data: :none,
                  bit_map_indicator: :bit_map_does_not_apply
                },
-               data: %Section7{}
+               section_7: %Section7{}
              } = grib
 
       assert %Section1{
