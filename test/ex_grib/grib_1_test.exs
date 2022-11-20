@@ -13,7 +13,7 @@ defmodule ExGrib.Grib1Test do
   alias ExGrib.Grib1.Table8
   alias ExGrib.Grib1.Table11
 
-  import ExGrib.Test.File, only: [file_contents: 1]
+  import ExGrib.Test.File, only: [file_contents: 1, file_contents: 2]
 
   doctest ExGrib.Grib1
 
@@ -24,6 +24,39 @@ defmodule ExGrib.Grib1Test do
 
     test "it returns false otherwise" do
       assert false == Grib1.detect(file_contents("gfs_25km.grb2"))
+    end
+  end
+
+  describe "generate_grid/1" do
+    test "it assigns values to latitude / longitude" do
+      assert {:ok, message, _} =
+               Grib1.parse(file_contents("forecast.grb", skip: [octets: 180_272]), read_data: true)
+
+      # assert we've found the right message
+      assert message.section_1.indicator_of_parameter == %Table2{
+               parameter: :temperature,
+               unit: :k
+             }
+
+      assert message.section_1.indicator_of_type_of_level == %Table3{
+               octet_10: :specified_height_level_above_ground,
+               octet_11: :height_in_metres,
+               octet_12: :continue
+             }
+
+      assert message.section_1.level == 2
+      assert message.section_1.p1 == 720
+
+      [["Latitude", "Longitude", "Value"] | expected_data] =
+        file_contents("forecast_temperatures.csv", parse: :csv)
+
+      parsed_data =
+        Enum.map(
+          Grib1.generate_grid(message),
+          &[&1.latitude / 1000, &1.longitude / 1000, &1.value]
+        )
+
+      assert Enum.sort(parsed_data) == Enum.sort(expected_data)
     end
   end
 

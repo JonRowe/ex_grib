@@ -2,20 +2,6 @@ defmodule ExGrib.Grib1.Packing.Simple do
   @moduledoc """
   """
 
-  defstruct latitude: :not_parsed, longitude: :not_parsed, value: :not_parsed
-
-  alias ExGrib.Grib1.Grid
-
-  def read(%{section_2: section_2, section_4: section_4}) do
-    Enum.with_index(section_4.data, fn value, index ->
-      %__MODULE__{
-        latitude: Grid.latitude(section_2.grid_definition, index),
-        longitude: Grid.longitude(section_2.grid_definition, index),
-        value: value
-      }
-    end)
-  end
-
   def parse(section, binary, decimal_scale_factor, opts \\ [])
 
   def parse(%{bits_per_value: n} = section, binary, d, opts) when byte_size(binary) * 8 >= n do

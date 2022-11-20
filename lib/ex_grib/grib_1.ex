@@ -3,6 +3,7 @@ defmodule ExGrib.Grib1 do
   Functions for working with Grib1 files.
   """
 
+  alias ExGrib.Grib1.Grid
   alias ExGrib.Grib1.Section0
   alias ExGrib.Grib1.Section1
   alias ExGrib.Grib1.Section2
@@ -33,6 +34,17 @@ defmodule ExGrib.Grib1 do
       {:ok, _, _} -> true
       :error -> false
     end
+  end
+
+  @spec generate_grid(t()) :: [%{latitude: integer(), longitude: integer(), value: number()}]
+  def generate_grid(%__MODULE__{section_2: section_2, section_4: section_4}) do
+    Enum.with_index(section_4.data, fn value, index ->
+      %{
+        latitude: Grid.latitude(section_2.grid_definition, index),
+        longitude: Grid.longitude(section_2.grid_definition, index),
+        value: value
+      }
+    end)
   end
 
   @spec parse(binary(), options()) :: {:ok, t(), binary()} | :error
