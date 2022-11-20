@@ -18,7 +18,7 @@ defmodule ExGrib.Grib2 do
   @type section_number :: integer()
   @type section_size :: integer()
 
-  defstruct header: :not_parsed,
+  defstruct section_0: :not_parsed,
             identification: :not_parsed,
             local_use: :not_parsed,
             grid_definition: :not_parsed,
@@ -29,7 +29,7 @@ defmodule ExGrib.Grib2 do
 
   @type t ::
           %__MODULE__{
-            header: Section0.t() | :not_parsed,
+            section_0: Section0.t() | :not_parsed,
             identification: Section1.t() | :not_parsed,
             local_use: Section2.t() | :not_parsed,
             grid_definition: Section3.t() | :not_parsed,
@@ -50,7 +50,7 @@ defmodule ExGrib.Grib2 do
   @spec parse(binary()) :: {:ok, t()} | {:ok, t(), binary()} | :error
   def parse(binary) do
     {binary, %__MODULE__{}}
-    |> parse_step(:header, &header/1)
+    |> parse_step(:section_0, &Section0.parse/1)
     |> parse_step(:identification, &identification/1)
     |> parse_step(:local_use, &local_use/1)
     |> parse_step(:grid_definition, &grid_definition/1)
@@ -60,9 +60,6 @@ defmodule ExGrib.Grib2 do
     |> parse_step(:data, &data/1)
     |> parse_step(:footer, &footer/1)
   end
-
-  @spec header(Section0.input()) :: Section0.t()
-  def header(input), do: Section0.parse(input)
 
   @spec identification(Section1.input()) :: Section1.t()
   def identification(input), do: Section1.parse(input)

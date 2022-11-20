@@ -28,17 +28,6 @@ defmodule ExGrib.Grib2Test do
     end
   end
 
-  describe "header/1" do
-    test "it returns the header of the grib" do
-      assert {:ok, %Section0{discipline: :meteorological, file_size: 188}, _} =
-               Grib2.header(file_contents("gfs_25km.grb2"))
-    end
-
-    test "it errors on unrecognised headers" do
-      assert :error = Grib2.header(<<"NOTAGRIB">>)
-    end
-  end
-
   describe "identification/1" do
     test "it returns the identification details of the grib" do
       assert {:ok, section, _} =
@@ -228,7 +217,7 @@ defmodule ExGrib.Grib2Test do
       assert {:ok, %Grib2{} = grib, _more_data} = Grib2.parse(file_contents("gfs_25km.grb2"))
 
       assert %Grib2{
-               header: %Section0{discipline: :meteorological, file_size: 188},
+               section_0: %Section0{discipline: :meteorological, file_size: 188},
                identification: %Section1{} = section_1,
                local_use: :not_present,
                grid_definition: section_3,
