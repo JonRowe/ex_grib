@@ -24,7 +24,7 @@ defmodule ExGrib.Grib2 do
             section_3: :not_parsed,
             section_4: :not_parsed,
             section_5: :not_parsed,
-            bitmap: :not_parsed,
+            section_6: :not_parsed,
             data: :not_parsed
 
   @type t ::
@@ -35,7 +35,7 @@ defmodule ExGrib.Grib2 do
             section_3: Section3.t() | :not_parsed,
             section_4: Section4.t() | :not_parsed,
             section_5: Section5.t() | :not_parsed,
-            bitmap: Section6.t() | :not_parsed,
+            section_6: Section6.t() | :not_parsed,
             data: Section7.t() | :not_parsed
           }
 
@@ -56,13 +56,10 @@ defmodule ExGrib.Grib2 do
     |> parse_step(:section_3, &Section3.parse/1)
     |> parse_step(:section_4, &Section4.parse/1)
     |> parse_step(:section_5, &Section5.parse/1)
-    |> parse_step(:bitmap, &bitmap/1)
+    |> parse_step(:section_6, &Section6.parse/1)
     |> parse_step(:data, &data/1)
     |> parse_step(:footer, &footer/1)
   end
-
-  @spec bitmap(Section6.input()) :: Section6.t()
-  def bitmap(binary), do: Section6.parse(binary)
 
   @spec data(Section7.input()) :: Section7.t()
   def data(binary), do: Section7.parse(binary)

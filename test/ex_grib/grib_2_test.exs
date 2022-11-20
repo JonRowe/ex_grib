@@ -27,22 +27,6 @@ defmodule ExGrib.Grib2Test do
     end
   end
 
-  describe "bitmap/1" do
-    test "it returns bitmap data" do
-      assert {:ok, %Section6{bit_map_data: "bitmap", bit_map_indicator: :bit_map_attached},
-              "rest"} = Grib2.bitmap(<<0, 0, 0, 12, 6, 0, "bitmap", "rest">>)
-    end
-
-    test "a grib with no bitmap will skip the bitmap data" do
-      assert {:ok, %Section6{bit_map_data: :none, bit_map_indicator: :bit_map_does_not_apply}, _} =
-               Grib2.bitmap(file_contents("gfs_25km.grb2", skip: [octets: 164]))
-    end
-
-    test "it errors on an unrecognised section" do
-      assert :error = Grib2.bitmap(<<"NOTAGRIB">>)
-    end
-  end
-
   describe "data/1" do
     test "it returns data" do
       assert {:ok, %Section7{}, _} =
@@ -80,7 +64,10 @@ defmodule ExGrib.Grib2Test do
                section_3: section_3,
                section_4: section_4,
                section_5: section_5,
-               bitmap: %Section6{bit_map_data: :none, bit_map_indicator: :bit_map_does_not_apply},
+               section_6: %Section6{
+                 bit_map_data: :none,
+                 bit_map_indicator: :bit_map_does_not_apply
+               },
                data: %Section7{}
              } = grib
 
