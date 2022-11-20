@@ -129,15 +129,8 @@ defmodule ExGribTest do
       _ ->
         false
     end)
-    |> find_value()
-  end
-
-  defp find_value([message]) do
-    message
-    |> Grib1.generate_grid()
-    |> Enum.find_value(fn
-      %{latitude: 49910, longitude: -5946, value: value} -> value
-      %{latitude: _lat, longitude: _lon} -> false
-    end)
+    |> case do
+      [message] -> Enum.at(message.section_4.data, Grib1.index(message, 49910, -5946))
+    end
   end
 end
