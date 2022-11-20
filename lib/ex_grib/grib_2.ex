@@ -19,7 +19,7 @@ defmodule ExGrib.Grib2 do
   @type section_size :: integer()
 
   defstruct section_0: :not_parsed,
-            identification: :not_parsed,
+            section_1: :not_parsed,
             local_use: :not_parsed,
             grid_definition: :not_parsed,
             product_definition: :not_parsed,
@@ -30,7 +30,7 @@ defmodule ExGrib.Grib2 do
   @type t ::
           %__MODULE__{
             section_0: Section0.t() | :not_parsed,
-            identification: Section1.t() | :not_parsed,
+            section_1: Section1.t() | :not_parsed,
             local_use: Section2.t() | :not_parsed,
             grid_definition: Section3.t() | :not_parsed,
             product_definition: Section4.t() | :not_parsed,
@@ -51,7 +51,7 @@ defmodule ExGrib.Grib2 do
   def parse(binary) do
     {binary, %__MODULE__{}}
     |> parse_step(:section_0, &Section0.parse/1)
-    |> parse_step(:identification, &identification/1)
+    |> parse_step(:section_1, &Section1.parse/1)
     |> parse_step(:local_use, &local_use/1)
     |> parse_step(:grid_definition, &grid_definition/1)
     |> parse_step(:product_definition, &product_definition/1)
@@ -60,9 +60,6 @@ defmodule ExGrib.Grib2 do
     |> parse_step(:data, &data/1)
     |> parse_step(:footer, &footer/1)
   end
-
-  @spec identification(Section1.input()) :: Section1.t()
-  def identification(input), do: Section1.parse(input)
 
   @spec local_use(Section2.input()) :: Section2.t()
   def local_use(input), do: Section2.parse(input)
