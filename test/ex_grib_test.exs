@@ -3,13 +3,18 @@ defmodule ExGribTest do
 
   alias ExGrib.Grib1
   alias ExGrib.Grib1.Section1
-  alias ExGrib.Grib1.Table2
-  alias ExGrib.Grib1.Table3
   alias ExGrib.Grib2
 
   doctest ExGrib
 
   import ExGrib.Test.File, only: [file_contents: 1]
+
+  describe "find/2" do
+    test "it finds messages matching the query" do
+      assert {:ok, messages} = ExGrib.parse_all(file_contents("forecast.grb"), read_data: true)
+      assert length(ExGrib.find(messages, parameter: :temperature)) == 112
+    end
+  end
 
   describe "parse_all/1" do
     test "it pulls out all the gribs in grib1 format" do
@@ -29,19 +34,9 @@ defmodule ExGribTest do
 
       assert length(more_gribs) == 2293
     end
+  end
 
-    @height_above_ground %Table3{
-      octet_10: :specified_height_level_above_ground,
-      octet_11: :height_in_metres,
-      octet_12: :continue
-    }
-
-    @isobaric %Table3{
-      octet_10: :isobaric_surface,
-      octet_11: :pressure_in_hpa,
-      octet_12: :continue
-    }
-
+  describe "with a valid grib 1" do
     test "it reads data according to the grid definition and returns decoded values" do
       assert {:ok, messages} = ExGrib.parse_all(file_contents("forecast.grb"), read_data: true)
 
@@ -81,53 +76,33 @@ defmodule ExGribTest do
                pressure: 101_985.421875
              } = %{
                wind_10m: {
-                 read_wind(messages, :u_component_of_wind, level: 10),
-                 read_wind(messages, :v_component_of_wind, level: 10)
+                 read(messages, parameter: :u_component_of_wind, level: 10),
+                 read(messages, parameter: :v_component_of_wind, level: 10)
                },
                wind_40m: {
-                 read_wind(messages, :u_component_of_wind, level: 40),
-                 read_wind(messages, :v_component_of_wind, level: 40)
+                 read(messages, parameter: :u_component_of_wind, level: 40),
+                 read(messages, parameter: :v_component_of_wind, level: 40)
                },
                wind_iso: {
-                 read_wind(messages, :u_component_of_wind, level: 850, table_3: @isobaric),
-                 read_wind(messages, :v_component_of_wind, level: 850, table_3: @isobaric)
+                 read(messages, parameter: :u_component_of_wind, type_of_level: :isobaric_surface),
+                 read(messages, parameter: :v_component_of_wind, type_of_level: :isobaric_surface)
                },
-               cloud: read(messages, %Table2{parameter: :total_cloud_cover, unit: :percentage}),
-               precipitation:
-                 read(messages, %Table2{parameter: :precipitation_rate, unit: :kg_m2_s1}),
-               temperature:
-                 read(messages, %Table2{parameter: :temperature, unit: :k}, @height_above_ground),
+               cloud: read(messages, parameter: :total_cloud_cover),
+               precipitation: read(messages, parameter: :precipitation_rate),
+               temperature: read(messages, parameter: :temperature, level: 2),
                temperature_iso:
-                 read(messages, %Table2{parameter: :temperature, unit: :k}, @isobaric),
-               pressure: read(messages, %Table2{parameter: :pressure_reduced_to_msl, unit: :pa})
+                 read(messages, parameter: :temperature, type_of_level: :isobaric_surface),
+               pressure: read(messages, parameter: :pressure_reduced_to_msl)
              }
     end
   end
 
-  defp read_wind(messages, component, opts) do
-    table_2 = %Table2{parameter: component, unit: :m_s1}
-    table_3 = Keyword.get(opts, :table_3, @height_above_ground)
-    height = Keyword.fetch!(opts, :level)
-
-    read(messages, table_2, table_3, height)
-  end
-
-  defp read(messages, table_2, table_3 \\ :not_passed, level \\ :not_passed) do
+  defp read(messages, query) do
     messages
+    |> ExGrib.find(query)
     |> Enum.filter(fn
-      %{
-        section_1: %Section1{
-          p1: 720,
-          indicator_of_parameter: ^table_2,
-          indicator_of_type_of_level: type_of_level,
-          level: section_level
-        }
-      } ->
-        (table_3 == :not_passed || table_3 == type_of_level) &&
-          (level == :not_passed || level == section_level)
-
-      _ ->
-        false
+      %{section_1: %Section1{p1: 720}} -> true
+      _ -> false
     end)
     |> case do
       [message] -> Enum.at(message.section_4.data, Grib1.index(message, 49910, -5946))

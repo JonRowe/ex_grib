@@ -8,6 +8,14 @@ defmodule ExGrib do
 
   @type options :: [] | Grib1.options()
 
+  @spec find(list(Grib1.t() | Grib2.t()), list(keyword())) :: list(Grib1.t() | Grib2.t())
+  def find(messages, query \\ []) do
+    Enum.filter(messages, fn
+      %Grib1{} = message -> Grib1.matches?(message, query)
+      _ -> raise ArgumentError, "find/2 currently only supports Grib1"
+    end)
+  end
+
   @spec parse_all(binary(), options()) :: {:ok, list(Grib2.t())} | {:error, String.t()}
   def parse_all(binary, opts \\ []) do
     with {:ok, grib, more} <- parse(binary, opts), {:ok, gribs} <- parse_all(more, opts) do
