@@ -27,47 +27,6 @@ defmodule ExGrib.Grib2Test do
     end
   end
 
-  describe "grid_definition/1" do
-    test "it returns grib definition data" do
-      assert {:ok, section, _} =
-               Grib2.grid_definition(file_contents("gfs_25km.grb2", skip: [octets: 37]))
-
-      assert %Section3{
-               interpetation_of_optional_list: :no_attached_list,
-               number_of_data_points: 9,
-               optional_list: "",
-               source: :grib_template,
-               template: %LatitudeLongitude{} = template
-             } = section
-
-      assert %LatitudeLongitude{
-               basic_angle: 0,
-               basic_angle_subdivisions: 0,
-               d_i: 250_000,
-               d_j: 250_000,
-               first_point_latitude: 51_000_000,
-               first_point_longitude: 358_500_000,
-               last_point_latitude: 50_500_000,
-               last_point_longitude: 359_000_000,
-               major_axis_scale_factor: 0,
-               major_axis_scale_value: 0,
-               minor_axis_scale_factor: 0,
-               minor_axis_scale_value: 0,
-               n_i: 3,
-               n_j: 3,
-               radius_scale_factor: 0,
-               radius_scale_value: 0,
-               resolution_and_component_flag: 48,
-               scanning_mode: :error,
-               shape_of_the_earth: :spherical_2
-             } = template
-    end
-
-    test "it errors on an unrecognised section" do
-      assert :error = Grib2.grid_definition(<<"NOTAGRIB">>)
-    end
-  end
-
   describe "product_definition/1" do
     test "it returns production definition data" do
       assert {:ok, section, _} =
@@ -177,7 +136,7 @@ defmodule ExGrib.Grib2Test do
                section_0: %Section0{discipline: :meteorological, file_size: 188},
                section_1: %Section1{} = section_1,
                section_2: :not_present,
-               grid_definition: section_3,
+               section_3: section_3,
                product_definition: section_4,
                data_representation: section_5,
                bitmap: %Section6{bit_map_data: :none, bit_map_indicator: :bit_map_does_not_apply},

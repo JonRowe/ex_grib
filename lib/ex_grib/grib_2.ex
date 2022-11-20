@@ -21,7 +21,7 @@ defmodule ExGrib.Grib2 do
   defstruct section_0: :not_parsed,
             section_1: :not_parsed,
             section_2: :not_parsed,
-            grid_definition: :not_parsed,
+            section_3: :not_parsed,
             product_definition: :not_parsed,
             data_representation: :not_parsed,
             bitmap: :not_parsed,
@@ -32,7 +32,7 @@ defmodule ExGrib.Grib2 do
             section_0: Section0.t() | :not_parsed,
             section_1: Section1.t() | :not_parsed,
             section_2: Section2.t() | :not_parsed,
-            grid_definition: Section3.t() | :not_parsed,
+            section_3: Section3.t() | :not_parsed,
             product_definition: Section4.t() | :not_parsed,
             data_representation: Section5.t() | :not_parsed,
             bitmap: Section6.t() | :not_parsed,
@@ -53,16 +53,13 @@ defmodule ExGrib.Grib2 do
     |> parse_step(:section_0, &Section0.parse/1)
     |> parse_step(:section_1, &Section1.parse/1)
     |> parse_step(:section_2, &Section2.parse/1)
-    |> parse_step(:grid_definition, &grid_definition/1)
+    |> parse_step(:section_3, &Section3.parse/1)
     |> parse_step(:product_definition, &product_definition/1)
     |> parse_step(:data_representation, &data_representation/1)
     |> parse_step(:bitmap, &bitmap/1)
     |> parse_step(:data, &data/1)
     |> parse_step(:footer, &footer/1)
   end
-
-  @spec grid_definition(Section3.input()) :: Section3.t()
-  def grid_definition(binary), do: Section3.parse(binary)
 
   @spec product_definition(Section4.input()) :: Section4.t()
   def product_definition(binary), do: Section4.parse(binary)
